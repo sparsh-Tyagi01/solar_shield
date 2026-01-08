@@ -431,7 +431,7 @@ async def explain_prediction(bz: float, speed: float, density: float):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.websocket("/realtime/stream")
+@app.websocket("/ws")
 async def realtime_stream(websocket: WebSocket):
     """
     WebSocket endpoint for real-time data streaming
@@ -456,6 +456,11 @@ async def realtime_stream(websocket: WebSocket):
                 # Send update
                 await websocket.send_json({
                     "timestamp": datetime.utcnow().isoformat(),
+                    "bz": realtime_data.get('bz', 0),
+                    "speed": realtime_data.get('speed', 400),
+                    "density": realtime_data.get('density', 5),
+                    "pressure": realtime_data.get('pressure', 2.0),
+                    "kp_index": realtime_data.get('kp_index', 3),
                     "current_conditions": realtime_data,
                     "predictions": {
                         "storm_occurrence": storm_pred.dict(),
@@ -480,6 +485,209 @@ async def realtime_stream(websocket: WebSocket):
         logger.error(f"WebSocket error: {e}", exc_info=True)
     finally:
         logger.info("WebSocket connection closed")
+
+
+@app.get("/api/current-conditions")
+async def get_current_conditions():
+    """Get current space weather conditions"""
+    try:
+        # Fetch latest data from NASA/NOAA
+        realtime_data = data_fetcher.fetch_realtime_data()
+        
+        return {
+            "bz": realtime_data.get('bz', 0),
+            "speed": realtime_data.get('speed', 400),
+            "density": realtime_data.get('density', 5),
+            "pressure": realtime_data.get('pressure', 2.0),
+            "kp_index": realtime_data.get('kp_index', 3),
+            "xray_flux": realtime_data.get('xray_flux', 1e-6),
+            "proton_flux": realtime_data.get('proton_flux', 1.0),
+            "timestamp": format_timestamp(datetime.utcnow())
+        }
+    except Exception as e:
+        logger.warning(f"Error fetching real-time data, using mock data: {e}")
+        # Return mock data if real-time fetch fails
+        return {
+            "bz": -5.0 + np.random.randn() * 3,
+            "speed": 450 + np.random.randn() * 50,
+            "density": 8.0 + np.random.randn() * 2,
+            "pressure": 2.5 + np.random.randn() * 0.5,
+            "kp_index": 3 + int(np.random.randn()),
+            "xray_flux": 1e-6,
+            "proton_flux": 5.0,
+            "timestamp": format_timestamp(datetime.utcnow())
+        }
+
+
+@app.get("/api/predict/storm")
+async def get_storm_prediction():
+    """Get storm prediction based on current conditions"""
+    try:
+        # Get current conditions
+        conditions = await get_current_conditions()
+        
+        # Create data object
+        data = SpaceWeatherData(
+            bz=conditions['bz'],
+            speed=conditions['speed'],
+            density=conditions['density'],
+            pressure=conditions.get('pressure'),
+            xray_flux=conditions.get('xray_flux'),
+            proton_flux=conditions.get('proton_flux')
+        )
+        
+        # Get predictions
+        storm_pred = await predict_storm(data)
+        severity_pred = await predict_severity(data)
+        
+        # Determine alert level
+        prob = storm_pred['probability'] if isinstance(storm_pred, dict) else storm_pred.probability
+        severity = severity_pred['severity_score'] if isinstance(severity_pred, dict) else severity_pred.severity_score
+        
+        if prob > 0.7 and severity > 7:
+            alert_level = "critical"
+        elif prob > 0.5 and severity > 5:
+            alert_level = "warning"
+        elif prob > 0.3:
+            alert_level = "watch"
+        else:
+            alert_level = "normal"
+        
+        # Handle both dict and Pydantic model responses
+        if isinstance(storm_pred, dict):
+            storm_data = storm_pred
+        else:
+            storm_data = storm_pred.dict()
+            
+        if isinstance(severity_pred, dict):
+            severity_data = severity_pred
+        else:
+            severity_data = severity_pred.dict()
+        
+        return {
+            "storm_probability": storm_data['probability'],
+            "severity": severity_data['severity_score'],
+            "alert_level": alert_level,
+            "will_storm_occur": storm_data['will_storm_occur'],
+            "category": severity_data['category'],
+            "risk_level": storm_data['risk_level'],
+            "timestamp": storm_data.get('timestamp', format_timestamp(datetime.utcnow()))
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in storm prediction endpoint: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/predict/impact")
+async def get_impact_prediction():
+    """Get impact prediction based on current conditions"""
+    try:
+        # Get current conditions
+        conditions = await get_current_conditions()
+        
+        # Create data object
+        data = SpaceWeatherData(
+            bz=conditions['bz'],
+            speed=conditions['speed'],
+            density=conditions['density'],
+            pressure=conditions.get('pressure'),
+            xray_flux=conditions.get('xray_flux'),
+            proton_flux=conditions.get('proton_flux')
+        )
+        
+        # Check if impact model is available
+        if impact_model is None or not impact_model.is_trained:
+            # Return mock impact data if model not available
+            logger.warning("Impact model not available, returning mock data")
+            
+            # Calculate risk based on severity
+            severity_pred = await predict_severity(data)
+            severity = severity_pred['severity_score'] if isinstance(severity_pred, dict) else severity_pred.severity_score
+            
+            risk_factor = severity / 10.0
+            
+            return {
+                "satellites": {
+                    "risk": min(risk_factor * 0.8, 1.0),
+                    "affected": risk_factor > 0.5
+                },
+                "gps": {
+                    "risk": min(risk_factor * 0.7, 1.0),
+                    "affected": risk_factor > 0.6
+                },
+                "communication": {
+                    "risk": min(risk_factor * 0.6, 1.0),
+                    "affected": risk_factor > 0.7
+                },
+                "power_grid": {
+                    "risk": min(risk_factor * 0.9, 1.0),
+                    "affected": risk_factor > 0.8
+                },
+                "affected_systems": [
+                    cat for cat in ["satellites", "gps", "communication", "power_grid"]
+                    if (cat == "satellites" and risk_factor > 0.5) or
+                       (cat == "gps" and risk_factor > 0.6) or
+                       (cat == "communication" and risk_factor > 0.7) or
+                       (cat == "power_grid" and risk_factor > 0.8)
+                ],
+                "timestamp": format_timestamp(datetime.utcnow())
+            }
+        
+        # Get impact prediction
+        impact_pred = await predict_impact(data)
+        
+        return impact_pred
+        
+    except Exception as e:
+        logger.error(f"Error in impact prediction endpoint: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/historical/{time_range}")
+async def get_historical_data(time_range: str):
+    """Get historical space weather data"""
+    try:
+        # Parse time range
+        if time_range == "24h":
+            hours = 24
+        elif time_range == "7d":
+            hours = 24 * 7
+        elif time_range == "30d":
+            hours = 24 * 30
+        else:
+            hours = 24
+        
+        # Generate mock historical data (in production, fetch from database)
+        from datetime import timedelta
+        
+        data_points = []
+        now = datetime.utcnow()
+        num_points = min(hours, 100)  # Limit to 100 points for performance
+        
+        for i in range(num_points):
+            time_offset = timedelta(hours=hours * (1 - i / num_points))
+            timestamp = now - time_offset
+            
+            # Generate realistic-looking data with some variation
+            base_bz = -5 + np.sin(i * 0.1) * 10
+            base_speed = 400 + np.sin(i * 0.05) * 100
+            base_density = 8 + np.sin(i * 0.08) * 4
+            
+            data_points.append({
+                "timestamp": timestamp.isoformat(),
+                "bz": float(base_bz + np.random.randn() * 2),
+                "speed": float(base_speed + np.random.randn() * 20),
+                "density": float(max(0, base_density + np.random.randn() * 1)),
+                "pressure": float(2.5 + np.random.randn() * 0.5),
+                "kp_index": int(max(0, min(9, 3 + np.random.randn())))
+            })
+        
+        return data_points
+        
+    except Exception as e:
+        logger.error(f"Error fetching historical data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/models/info")
