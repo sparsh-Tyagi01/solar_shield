@@ -4,12 +4,16 @@ import EarthVisualization from '../components/EarthVisualization';
 import RealTimeMetrics from '../components/RealTimeMetrics';
 import StormAlert from '../components/StormAlert';
 import SolarWindChart from '../components/SolarWindChart';
+import SatelliteMonitor from '../components/SatelliteMonitor';
+import RadiationChart from '../components/RadiationChart';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
 
 const Dashboard: React.FC = () => {
   const [currentData, setCurrentData] = useState<any>(null);
   const [predictions, setPredictions] = useState<any>(null);
+  const [satellites, setSatellites] = useState<any[]>([]);
+  const [radiationLevel, setRadiationLevel] = useState(0);
   const { messages } = useWebSocket();
 
   useEffect(() => {
@@ -25,6 +29,17 @@ const Dashboard: React.FC = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    // Calculate radiation level based on space weather conditions
+    if (currentData) {
+      const bz = currentData.bz || 0;
+      const speed = currentData.speed || 400;
+      const density = currentData.density || 5;
+      const radiation = Math.abs(bz) + (speed - 400) / 50 + density;
+      setRadiationLevel(radiation);
+    }
+  }, [currentData]);
+
   const fetchCurrentData = async () => {
     try {
       const [dataRes, predRes] = await Promise.all([
@@ -38,6 +53,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleSatelliteUpdate = (updatedSatellites: any[]) => {
+    setSatellites(updatedSatellites);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
@@ -49,7 +68,7 @@ const Dashboard: React.FC = () => {
           SolarGuard 3D - Real-Time Monitoring
         </h1>
         <p className="text-gray-300">
-          Space Weather Intelligence & Geomagnetic Storm Prediction
+          Space Weather Intelligence & Satellite Health Monitoring
         </p>
       </motion.div>
 
@@ -68,9 +87,15 @@ const Dashboard: React.FC = () => {
           className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
         >
           <h2 className="text-2xl font-semibold text-white mb-4">
-            Earth Magnetosphere
+            Earth Magnetosphere & Satellites
           </h2>
-          <EarthVisualization data={currentData} />
+          <EarthVisualization 
+            data={currentData} 
+            onSatelliteUpdate={handleSatelliteUpdate}
+          />
+          <p className="text-xs text-gray-400 mt-2 text-center">
+            Drag to rotate • Scroll to zoom • {satellites.length} satellites tracked
+          </p>
         </motion.div>
 
         <motion.div
@@ -86,10 +111,34 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-2xl font-semibold text-white mb-4">
+            Satellite Fleet Monitor
+          </h2>
+          <SatelliteMonitor 
+            satellites={satellites} 
+            radiationLevel={radiationLevel}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <RadiationChart currentRadiation={radiationLevel} />
+        </motion.div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.4 }}
         className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
       >
         <h2 className="text-2xl font-semibold text-white mb-4">
