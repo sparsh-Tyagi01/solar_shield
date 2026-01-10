@@ -1,8 +1,8 @@
 # 🌞 SolarGuard 3D
 
-**AI-Powered 3D Space Weather Intelligence Platform**
+**AI-Powered 3D Space Weather Intelligence Platform with Realistic Solar System Visualization**
 
-SolarGuard 3D predicts geomagnetic storm severity and visually simulates real-time Sun → Earth space-weather interactions in a scientifically accurate 3D environment.
+SolarGuard 3D predicts geomagnetic storm severity and visually simulates real-time Sun → Earth space-weather interactions in a scientifically accurate 3D environment featuring the Sun, Earth, Moon, and 6 tracked satellites.
 
 ## 🎯 Problem Statement
 
@@ -12,10 +12,31 @@ Existing systems:
 - ❌ Are 2D charts that are hard to interpret
 - ❌ Provide alerts but no intuitive visualization
 - ❌ Do not show cause → effect chain
+- ❌ Lack real-time satellite health monitoring
 
 ## ✨ Our Solution
 
 **AI-powered platform** that predicts geomagnetic storm severity and visually simulates real-time Sun → Earth space-weather interactions in a scientifically accurate 3D environment.
+
+### 🌟 New 3D Solar System Visualization
+
+**Realistic, data-driven 3D visualization featuring:**
+- ☀️ **Dynamic Sun** with solar flares and radiation effects
+- 🌍 **Earth** with magnetic field visualization that responds to solar activity
+- 🌙 **Moon** with realistic orbital mechanics
+- 🛰️ **6 Satellites** (GPS, Communication, Weather, ISS, Research) with:
+  - Real-time health monitoring
+  - Radiation degradation based on distance and solar activity
+  - Individual orbital paths and characteristics
+  - Color-coded health status (green → yellow → orange → red)
+
+**All visualizations are based on real ML model predictions:**
+- Solar radiation intensity from X-ray and proton flux
+- Magnetic field strength from Bz component
+- Satellite degradation from radiation exposure
+- Particle streams showing solar wind
+
+📖 **[View Complete 3D Features Documentation](3D_FEATURES.md)**
 
 ## 🧠 AI Models
 
@@ -42,39 +63,54 @@ Existing systems:
 
 ## 🚀 Quick Start
 
-### 1. Installation
+### Option 1: One-Command Start (Recommended)
+
+```bash
+# Start both backend and frontend with 3D visualization
+./start_3d_system.sh
+```
+
+Then visit:
+- **Main Dashboard**: http://localhost:3000
+- **3D Solar System**: http://localhost:3000/3d-view
+- **API Docs**: http://localhost:8000/docs
+
+### Option 2: Manual Setup
+
+#### 1. Installation
 
 ```bash
 # Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On macOS/Linux
+python -m venv .venv
+source .venv/bin/activate  # On macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
 ```
 
-### 2. Setup
-
-```bash
-# Copy environment file
-cp .env.example .env
-
-# Create necessary directories
-mkdir -p data/raw data/processed models logs
-```
-
-### 3. Train Models
+#### 2. Train Models
 
 ```bash
 # Fetch historical data and train all models
-python backend/ml/train_pipeline.py
+python -m backend.ml.train_pipeline
 ```
 
-### 4. Run Backend
+#### 3. Start Backend
 
 ```bash
-# Start FastAPI server
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+# Terminal 1: Start FastAPI server
+python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### 4. Start Frontend
+
+```bash
+# Terminal 2: Start React app
+cd frontend
+npm start
 ```
 
 ### 5. API Documentation
@@ -84,11 +120,11 @@ Visit: http://localhost:8000/docs
 ## 📡 API Endpoints
 
 - `POST /predict/storm` - Predict storm occurrence
-- `POST /predict/severity` - Predict storm severity
+- `POST /predict/severity` - Predict storm severity  
 - `POST /predict/impact` - Classify impact zones
 - `GET /explain/shap` - Get SHAP explanations
-- `GET /realtime/status` - Get current space weather status
-- `WebSocket /realtime/stream` - Real-time data stream
+- `GET /api/current-conditions` - Get current space weather
+- `WebSocket /ws` - Real-time data stream for 3D visualization
 
 ## 🏗️ Architecture
 
@@ -103,9 +139,27 @@ AI Models (3 models)
         ↓
 Prediction API (FastAPI)
         ↓
-3D Visualization Engine
+Real-Time Data Stream (WebSocket)
         ↓
-Web Dashboard
+3D Visualization Engine (Three.js)
+        ↓
+React Dashboard + Full-Screen 3D View
+```
+
+### 3D Visualization Pipeline
+
+```
+ML Model Predictions → Backend API → WebSocket
+                                        ↓
+                              Frontend State Management
+                                        ↓
+        ┌───────────────────────────────┴──────────────────────────┐
+        ↓                               ↓                           ↓
+   Sun Radiation              Earth Magnetic Field          Satellite Health
+   (X-ray flux)                   (Bz component)          (Distance + Radiation)
+        ↓                               ↓                           ↓
+   Visual Effects             Field Line Colors              Color Coding
+   (Flares, Particles)        (Blue/Red transition)         (Green → Red)
 ```
 
 ## 📁 Project Structure
@@ -113,24 +167,43 @@ Web Dashboard
 ```
 SolarSheild/
 ├── backend/
-│   ├── main.py                 # FastAPI app
+│   ├── main.py                 # FastAPI app with WebSocket
 │   ├── config.py               # Configuration
 │   ├── data/
 │   │   ├── fetcher.py          # Data ingestion
 │   │   └── feature_engineer.py # Feature engineering
 │   ├── ml/
-│   │   ├── storm_occurrence.py # Model A
-│   │   ├── storm_severity.py   # Model B
-│   │   ├── impact_risk.py      # Model C
+│   │   ├── storm_occurrence.py # Model A (Random Forest)
+│   │   ├── storm_severity.py   # Model B (LSTM)
+│   │   ├── impact_risk.py      # Model C (Random Forest)
 │   │   └── train_pipeline.py   # Training script
 │   └── utils/
 │       ├── helpers.py
 │       └── logger.py
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── SolarSystemVisualization.tsx  # 🌟 3D Solar System
+│   │   │   ├── Navigation.tsx
+│   │   │   ├── RealTimeMetrics.tsx
+│   │   │   ├── SatelliteMonitor.tsx
+│   │   │   └── ...
+│   │   ├── pages/
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── SolarSystem3DView.tsx  # 🌟 Full-screen 3D
+│   │   │   ├── StormPrediction.tsx
+│   │   │   └── ...
+│   │   └── context/
+│   │       └── WebSocketContext.tsx
+│   └── package.json
 ├── data/
-│   ├── raw/                    # Raw data
-│   └── processed/              # Processed data
-├── models/                     # Trained models
+│   ├── raw/                    # Raw space weather data
+│   └── processed/              # Engineered features
+├── models/                     # Trained ML models (.pkl, .h5)
 ├── logs/                       # Application logs
+├── start_3d_system.sh         # 🌟 One-command startup script
+├── 3D_FEATURES.md             # 🌟 Complete 3D features documentation
+├── 3D_VISUALIZATION_GUIDE.md  # 🌟 Technical implementation guide
 └── requirements.txt
 ```
 

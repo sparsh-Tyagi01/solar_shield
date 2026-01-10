@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import StormPrediction from './pages/StormPrediction';
 import ImpactAnalysis from './pages/ImpactAnalysis';
 import HistoricalData from './pages/HistoricalData';
+import SolarSystem3DView from './pages/SolarSystem3DView';
 import Navigation from './components/Navigation';
 import { WebSocketProvider } from './context/WebSocketContext';
 import './App.css';
@@ -16,6 +17,7 @@ function App() {
           <Navigation />
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/3d-view" element={<SolarSystem3DView />} />
             <Route path="/prediction" element={<StormPrediction />} />
             <Route path="/impact" element={<ImpactAnalysis />} />
             <Route path="/history" element={<HistoricalData />} />

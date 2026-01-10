@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import EarthVisualization from '../components/EarthVisualization';
+import SolarSystemVisualization from '../components/SolarSystemVisualization';
 import RealTimeMetrics from '../components/RealTimeMetrics';
 import StormAlert from '../components/StormAlert';
 import SolarWindChart from '../components/SolarWindChart';
@@ -14,6 +14,7 @@ const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any>(null);
   const [satellites, setSatellites] = useState<any[]>([]);
   const [radiationLevel, setRadiationLevel] = useState(0);
+  const [magneticFieldStrength, setMagneticFieldStrength] = useState(1.0);
   const { messages } = useWebSocket();
 
   useEffect(() => {
@@ -30,13 +31,17 @@ const Dashboard: React.FC = () => {
   }, [messages]);
 
   useEffect(() => {
-    // Calculate radiation level based on space weather conditions
+    // Calculate radiation level and magnetic field based on space weather conditions
     if (currentData) {
       const bz = currentData.bz || 0;
       const speed = currentData.speed || 400;
       const density = currentData.density || 5;
       const radiation = Math.abs(bz) + (speed - 400) / 50 + density;
       setRadiationLevel(radiation);
+
+      // Magnetic field strength affected by Bz (negative Bz weakens field)
+      const fieldStrength = bz < 0 ? Math.max(0.3, 1.0 + (bz / 20)) : 1.0 + (bz / 100);
+      setMagneticFieldStrength(fieldStrength);
     }
   }, [currentData]);
 
@@ -80,24 +85,33 @@ const Dashboard: React.FC = () => {
         />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 mb-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
         >
           <h2 className="text-2xl font-semibold text-white mb-4">
-            Earth Magnetosphere & Satellites
+            Solar System - Real-Time 3D Visualization
           </h2>
-          <EarthVisualization 
-            data={currentData} 
-            onSatelliteUpdate={handleSatelliteUpdate}
-          />
+          <div className="w-full h-[600px]">
+            <SolarSystemVisualization
+              radiationLevel={radiationLevel}
+              bzValue={currentData?.bz || 0}
+              solarWindSpeed={currentData?.speed || 400}
+              protonFlux={currentData?.proton_flux || 1.0}
+              xrayFlux={currentData?.xray_flux || 1e-6}
+              magneticFieldStrength={magneticFieldStrength}
+              onSatelliteUpdate={handleSatelliteUpdate}
+            />
+          </div>
           <p className="text-xs text-gray-400 mt-2 text-center">
-            Drag to rotate • Scroll to zoom • {satellites.length} satellites tracked
+            Drag to rotate • Scroll to zoom • 6 satellites tracked • Sun radiation and Earth's magnetic field based on real ML model data
           </p>
         </motion.div>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

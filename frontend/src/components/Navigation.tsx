@@ -7,6 +7,7 @@ const Navigation: React.FC = () => {
 
   const links = [
     { path: '/', label: 'Dashboard' },
+    { path: '/3d-view', label: '3D Solar System' },
     { path: '/prediction', label: 'Storm Prediction' },
     { path: '/impact', label: 'Impact Analysis' },
     { path: '/history', label: 'Historical Data' },
