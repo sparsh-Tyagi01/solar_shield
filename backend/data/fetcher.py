@@ -153,19 +153,20 @@ class SpaceWeatherDataFetcher:
         n = len(dates)
         
         # Generate realistic solar wind parameters with storms
-        np.random.seed(42)
+        # Use time-based seed for variation across calls
+        np.random.seed(int(datetime.utcnow().timestamp()) % 1000)
         
         # Base values with noise and occasional storms
-        bz = np.random.normal(0, 3, n)
+        bz = np.random.normal(-2, 5, n)  # More negative on average for more impact
         # Add storm events (southward Bz)
-        storm_indices = np.random.choice(n, size=int(n * 0.05), replace=False)
-        bz[storm_indices] = np.random.uniform(-15, -5, len(storm_indices))
+        storm_indices = np.random.choice(n, size=int(n * 0.1), replace=False)  # 10% storm events
+        bz[storm_indices] = np.random.uniform(-20, -8, len(storm_indices))
         
-        speed = np.random.normal(400, 50, n)
-        speed[storm_indices] = np.random.uniform(500, 800, len(storm_indices))
+        speed = np.random.normal(450, 80, n)  # Higher average speed
+        speed[storm_indices] = np.random.uniform(550, 850, len(storm_indices))
         
-        density = np.random.normal(5, 2, n)
-        density[storm_indices] = np.random.uniform(10, 30, len(storm_indices))
+        density = np.random.normal(7, 3, n)  # Higher average density
+        density[storm_indices] = np.random.uniform(12, 35, len(storm_indices))
         
         pressure = 1.67e-6 * density * speed**2  # Dynamic pressure
         
@@ -194,7 +195,9 @@ class SpaceWeatherDataFetcher:
         dates = pd.date_range(end=now, periods=1440, freq='1min')  # Last 24 hours
         
         # X-ray flux typically in range 1e-9 to 1e-3 W/m²
-        flux = np.random.lognormal(-14, 1, len(dates))
+        # Use time-based seed for variation
+        np.random.seed(int(now.timestamp()) % 1000)
+        flux = np.random.lognormal(-12, 1.5, len(dates))  # Higher average for more events
         
         df = pd.DataFrame({
             'timestamp': dates,
@@ -209,7 +212,9 @@ class SpaceWeatherDataFetcher:
         dates = pd.date_range(end=now, periods=1440, freq='1min')
         
         # Proton flux >10 MeV typically 0.1 to 1000 pfu
-        flux = np.random.lognormal(0, 1.5, len(dates))
+        # Use time-based seed for variation
+        np.random.seed(int(now.timestamp()) % 1000)
+        flux = np.random.lognormal(1, 2, len(dates))  # Higher values
         
         df = pd.DataFrame({
             'timestamp': dates,

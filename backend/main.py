@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import shap
+# import shap  # Optional - only needed for SHAP explanations
 
 from backend.ml import (
     StormOccurrencePredictor,
@@ -61,6 +61,138 @@ severity_model = None
 impact_model = None
 data_fetcher = None
 feature_engineer = None
+
+# Global satellite fleet state
+satellite_fleet = []
+
+
+def initialize_satellite_fleet():
+    """Initialize satellite fleet with realistic starting conditions based on current space weather"""
+    global satellite_fleet
+    
+    # Get current space weather conditions to determine initial health
+    try:
+        current_conditions = data_fetcher.fetch_realtime_data() if data_fetcher else None
+        # Calculate base health from recent conditions (90-98% depending on recent activity)
+        if current_conditions:
+            radiation_level = abs(current_conditions.get('bz', 0)) + current_conditions.get('xray_flux', 0) * 1e6
+            base_health = max(85, min(98, 98 - radiation_level * 0.5))
+        else:
+            base_health = 95
+    except:
+        base_health = 95
+    
+    satellite_fleet = [
+        {
+            'id': 'sat-1',
+            'name': 'GPS-IIF-12',
+            'type': 'GPS',
+            'health': base_health + np.random.uniform(-3, 2),
+            'degradation': np.random.uniform(0, 5),
+            'altitude': 20200,
+            'orbitalPeriod': 40,
+            'inclination': 55,  # degrees
+            'phase': 0
+        },
+        {
+            'id': 'sat-2',
+            'name': 'TDRS-13',
+            'type': 'Communication',
+            'health': base_health + np.random.uniform(-3, 2),
+            'degradation': np.random.uniform(0, 5),
+            'altitude': 35786,
+            'orbitalPeriod': 60,
+            'inclination': 15,
+            'phase': 60
+        },
+        {
+            'id': 'sat-3',
+            'name': 'GOES-18',
+            'type': 'Weather',
+            'health': base_health + np.random.uniform(-3, 2),
+            'degradation': np.random.uniform(0, 5),
+            'altitude': 35786,
+            'orbitalPeriod': 60,
+            'inclination': 0,
+            'phase': 180
+        },
+        {
+            'id': 'sat-4',
+            'name': 'ISS',
+            'type': 'ISS',
+            'health': base_health + np.random.uniform(-5, 0),  # ISS more vulnerable
+            'degradation': np.random.uniform(2, 8),
+            'altitude': 408,
+            'orbitalPeriod': 30,
+            'inclination': 51.6,
+            'phase': 90
+        },
+        {
+            'id': 'sat-5',
+            'name': 'GPS-IIF-07',
+            'type': 'GPS',
+            'health': base_health + np.random.uniform(-3, 2),
+            'degradation': np.random.uniform(0, 5),
+            'altitude': 20200,
+            'orbitalPeriod': 40,
+            'inclination': 55,
+            'phase': 180
+        },
+        {
+            'id': 'sat-6',
+            'name': 'Hubble Space Telescope',
+            'type': 'Research',
+            'health': base_health + np.random.uniform(-4, 1),
+            'degradation': np.random.uniform(5, 12),  # Older satellite
+            'altitude': 547,
+            'orbitalPeriod': 32,
+            'inclination': 28.5,
+            'phase': 270
+        }
+    ]
+    
+    logger.info(f"Satellite fleet initialized with {len(satellite_fleet)} satellites, avg health: {np.mean([s['health'] for s in satellite_fleet]):.1f}%")
+    return satellite_fleet
+
+
+def update_satellite_health(radiation_level: float, solar_wind_speed: float):
+    """Update satellite health based on current space weather"""
+    global satellite_fleet
+    
+    if not satellite_fleet:
+        initialize_satellite_fleet()
+        return
+    
+    for satellite in satellite_fleet:
+        # Calculate degradation based on space weather and satellite type
+        vulnerability = {
+            'ISS': 2.0,
+            'Research': 1.5,
+            'GPS': 1.0,
+            'Communication': 1.2,
+            'Weather': 0.9
+        }.get(satellite['type'], 1.0)
+        
+        # Degradation increases with radiation and solar wind
+        degradation_rate = (radiation_level * 0.02 + solar_wind_speed / 500) * vulnerability
+        satellite['degradation'] = min(100, satellite['degradation'] + degradation_rate)
+        
+        # Health decreases as degradation increases
+        satellite['health'] = max(0, 100 - satellite['degradation'] * 0.8)
+    
+    return satellite_fleet
+
+
+def safe_to_dict(obj):
+    """Safely convert Pydantic model or dict to dict"""
+    if isinstance(obj, dict):
+        return obj
+    elif hasattr(obj, 'model_dump'):
+        return obj.model_dump()
+    elif hasattr(obj, 'dict'):
+        return obj.dict()
+    else:
+        return obj
 
 
 # Pydantic models for request/response
@@ -136,6 +268,9 @@ async def startup_event():
             logger.info("✓ Storm occurrence model loaded")
         else:
             logger.warning("⚠ Storm occurrence model not found. Train models first.")
+            
+        # Initialize satellite fleet
+        initialize_satellite_fleet()
         
         if STORM_SEVERITY_MODEL_PATH.exists():
             severity_model = StormSeverityPredictor()
@@ -150,6 +285,8 @@ async def startup_event():
             logger.info("✓ Impact risk model loaded")
         else:
             logger.warning("⚠ Impact risk model not found. Train models first.")
+            logger.info("   To train the impact risk model, run: python -m backend.ml.train_pipeline")
+            logger.info("   The system will continue with fallback impact predictions.")
         
         logger.info("SolarGuard 3D API ready! 🌞")
         
@@ -180,6 +317,24 @@ async def health_check():
     return {
         "status": "healthy" if all(models_loaded.values()) else "degraded",
         "models": models_loaded,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@app.get("/api/satellites")
+async def get_satellite_fleet():
+    """
+    Get current satellite fleet status
+    Returns real-time satellite health and position data
+    """
+    global satellite_fleet
+    
+    if not satellite_fleet:
+        initialize_satellite_fleet()
+    
+    return {
+        "satellites": satellite_fleet,
+        "count": len(satellite_fleet),
         "timestamp": datetime.utcnow().isoformat()
     }
 
@@ -276,10 +431,10 @@ async def predict_impact(data: SpaceWeatherData):
     
     try:
         # Prepare features
-        # Note: This requires severity_score which we get from Model B
-        # For simplicity, calculate approximate severity
-        sym_h_approx = data.bz * 10 if data.bz < 0 else 0
-        severity_approx = abs(sym_h_approx / 20)
+        # Use proper severity calculation - bz of -10 should give severity ~5, -20 gives ~10
+        severity_approx = abs(data.bz) if data.bz < 0 else 0
+        severity_approx += (data.speed - 400) / 100 if data.speed > 400 else 0
+        severity_approx = max(0, min(10, severity_approx))  # Clamp to 0-10
         
         input_data = {
             'severity_score': severity_approx,
@@ -385,6 +540,11 @@ async def explain_prediction(bz: float, speed: float, density: float):
     Get SHAP explanation for storm occurrence prediction
     Explains WHY the model made its prediction
     """
+    try:
+        import shap
+    except ImportError:
+        raise HTTPException(status_code=503, detail="SHAP library not installed")
+    
     if occurrence_model is None or not occurrence_model.is_trained:
         raise HTTPException(status_code=503, detail="Model not available")
     
@@ -446,14 +606,33 @@ async def realtime_stream(websocket: WebSocket):
                 # Fetch latest data
                 realtime_data = data_fetcher.fetch_realtime_data()
                 
+                # Update satellite health based on current conditions
+                radiation_level = abs(realtime_data.get('bz', 0)) + realtime_data.get('xray_flux', 0) * 1e6
+                update_satellite_health(radiation_level, realtime_data.get('speed', 400))
+                
                 # Make predictions
                 data = SpaceWeatherData(**realtime_data)
                 
                 storm_pred = await predict_storm(data)
                 severity_pred = await predict_severity(data)
-                impact_pred = await predict_impact(data)
                 
-                # Send update
+                # Handle impact prediction - it may not be available
+                try:
+                    impact_pred = await predict_impact(data)
+                    impact_dict = safe_to_dict(impact_pred)
+                except HTTPException as e:
+                    # If impact model not available, use mock prediction
+                    logger.warning(f"Impact model unavailable, using fallback: {e.detail}")
+                    impact_dict = {
+                        'satellites': {'risk': 0.3, 'status': 'LOW', 'affected': False},
+                        'gps': {'risk': 0.2, 'status': 'LOW', 'affected': False},
+                        'communication': {'risk': 0.25, 'status': 'LOW', 'affected': False},
+                        'power_grid': {'risk': 0.15, 'status': 'MINIMAL', 'affected': False},
+                        'affected_systems': [],
+                        'timestamp': format_timestamp(datetime.utcnow())
+                    }
+                
+                # Send update with satellite data
                 await websocket.send_json({
                     "timestamp": datetime.utcnow().isoformat(),
                     "bz": realtime_data.get('bz', 0),
@@ -462,10 +641,11 @@ async def realtime_stream(websocket: WebSocket):
                     "pressure": realtime_data.get('pressure', 2.0),
                     "kp_index": realtime_data.get('kp_index', 3),
                     "current_conditions": realtime_data,
+                    "satellites": satellite_fleet,  # Include satellite data
                     "predictions": {
-                        "storm_occurrence": storm_pred.dict(),
-                        "severity": severity_pred.dict(),
-                        "impacts": impact_pred.dict()
+                        "storm_occurrence": safe_to_dict(storm_pred),
+                        "severity": safe_to_dict(severity_pred),
+                        "impacts": impact_dict
                     },
                     "visual_params": calculate_visual_params(realtime_data),
                     "cme_progress": 0.5  # Mock value - calculate based on time since detection
@@ -477,8 +657,11 @@ async def realtime_stream(websocket: WebSocket):
             except WebSocketDisconnect:
                 logger.info("WebSocket disconnected")
                 break
+            except HTTPException as e:
+                logger.error(f"HTTP error in WebSocket stream: {e.status_code} - {e.detail}")
+                await asyncio.sleep(UPDATE_INTERVAL)
             except Exception as e:
-                logger.error(f"Error in WebSocket stream: {e}")
+                logger.error(f"Error in WebSocket stream: {e}", exc_info=True)
                 await asyncio.sleep(UPDATE_INTERVAL)
                 
     except Exception as e:

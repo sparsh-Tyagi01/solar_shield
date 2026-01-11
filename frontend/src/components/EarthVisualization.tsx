@@ -19,6 +19,89 @@ interface SatelliteData {
   degradation: number;
 }
 
+// Component to show the affected region (footprint) on Earth
+const AffectedRegion: React.FC<{ 
+  position: THREE.Vector3; 
+  satelliteRadius: number;
+  satelliteType: string;
+  health: number;
+}> = ({ position, satelliteRadius, satelliteType, health }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  // Calculate footprint size based on satellite altitude
+  const footprintSize = satelliteRadius * 0.4; // Proportional to altitude
+  
+  // Project satellite position onto Earth surface
+  const earthSurface = position.clone().normalize();
+  
+  // Color based on satellite health and type
+  const getFootprintColor = () => {
+    if (health < 50) return '#ff3333'; // Red for critical
+    if (health < 80) return '#ffaa00'; // Orange for degraded
+    return satelliteType === 'ISS' ? '#00ff88' : 
+           satelliteType === 'GPS' ? '#4444ff' :
+           satelliteType === 'Communication' ? '#ff44ff' :
+           '#44ffff'; // Cyan for weather
+  };
+
+  useFrame(() => {
+    if (meshRef.current) {
+      // Make the footprint pulse
+      const scale = 1 + Math.sin(Date.now() * 0.003) * 0.1;
+      meshRef.current.scale.setScalar(scale);
+    }
+  });
+
+  return (
+    <mesh 
+      ref={meshRef}
+      position={earthSurface.multiplyScalar(1.01)}
+      rotation={[
+        Math.atan2(earthSurface.y, Math.sqrt(earthSurface.x ** 2 + earthSurface.z ** 2)),
+        Math.atan2(earthSurface.x, earthSurface.z),
+        0
+      ]}
+    >
+      <circleGeometry args={[footprintSize, 32]} />
+      <meshBasicMaterial 
+        color={getFootprintColor()}
+        transparent
+        opacity={0.4}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+};
+
+// Component to show connection line from satellite to affected region
+const SatelliteBeam: React.FC<{ 
+  start: THREE.Vector3; 
+  satelliteType: string;
+  health: number;
+}> = ({ start, satelliteType, health }) => {
+  const earthPoint = start.clone().normalize();
+  const points = [start, earthPoint];
+  
+  const beamColor = health < 50 ? '#ff3333' : 
+                    health < 80 ? '#ffaa00' : 
+                    satelliteType === 'ISS' ? '#00ff88' : '#44aaff';
+  
+  return (
+    <Line
+      points={points}
+      color={beamColor}
+      lineWidth={1}
+      transparent
+      opacity={0.3}
+      dashed
+      dashScale={2}
+      dashSize={0.1}
+      gapSize={0.05}
+    />
+  );
+};
+
 const Satellite: React.FC<{ 
   satellite: SatelliteData; 
   radiationLevel: number;
@@ -28,6 +111,7 @@ const Satellite: React.FC<{
   const solarPanelRef = useRef<THREE.Mesh>(null);
   const [localDegradation, setLocalDegradation] = useState(satellite.degradation);
   const [health, setHealth] = useState(satellite.health);
+  const [currentPosition, setCurrentPosition] = useState(new THREE.Vector3());
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -38,6 +122,7 @@ const Satellite: React.FC<{
       
       meshRef.current.position.set(x, y, z);
       meshRef.current.rotation.y = time * 0.5;
+      setCurrentPosition(new THREE.Vector3(x, y, z));
       
       if (solarPanelRef.current) {
         solarPanelRef.current.position.set(x, y, z);
@@ -92,6 +177,21 @@ const Satellite: React.FC<{
         <cylinderGeometry args={[0.01, 0.01, 0.15]} />
         <meshStandardMaterial color="#888888" metalness={1} />
       </mesh>
+      
+      {/* Show affected region on Earth */}
+      <AffectedRegion 
+        position={currentPosition}
+        satelliteRadius={satellite.radius}
+        satelliteType={satellite.type}
+        health={health}
+      />
+      
+      {/* Show beam connecting satellite to affected region */}
+      <SatelliteBeam
+        start={currentPosition}
+        satelliteType={satellite.type}
+        health={health}
+      />
     </group>
   );
 };
@@ -175,6 +275,66 @@ const Earth: React.FC<{
   const earthRef = useRef<THREE.Mesh>(null);
   const magnetosphereRef = useRef<THREE.Mesh>(null);
   const [glowIntensity, setGlowIntensity] = useState(0.2);
+  
+  // Create a more detailed Earth with continents
+  const createEarthTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d')!;
+    
+    // Ocean base
+    ctx.fillStyle = '#1a4d7a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw simplified continents (very basic representation)
+    ctx.fillStyle = '#2d5a2d';
+    
+    // North America
+    ctx.beginPath();
+    ctx.ellipse(200, 180, 80, 100, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // South America
+    ctx.beginPath();
+    ctx.ellipse(250, 320, 50, 80, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Europe
+    ctx.beginPath();
+    ctx.ellipse(500, 150, 60, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Africa
+    ctx.beginPath();
+    ctx.ellipse(530, 270, 70, 90, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Asia
+    ctx.beginPath();
+    ctx.ellipse(700, 180, 120, 80, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Australia
+    ctx.beginPath();
+    ctx.ellipse(800, 360, 50, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add some cloud-like texture
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const size = Math.random() * 30 + 10;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  };
+
+  const earthTexture = createEarthTexture();
 
   useFrame((state) => {
     if (earthRef.current) {
@@ -197,14 +357,14 @@ const Earth: React.FC<{
       {/* Stars background */}
       <Stars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
       
-      {/* Earth */}
+      {/* Earth with texture */}
       <Sphere ref={earthRef} args={[1, 64, 64]}>
         <meshStandardMaterial
-          color="#2244aa"
+          map={earthTexture}
           emissive="#112255"
-          emissiveIntensity={glowIntensity}
-          metalness={0.2}
-          roughness={0.8}
+          emissiveIntensity={glowIntensity * 0.3}
+          metalness={0.1}
+          roughness={0.9}
         />
       </Sphere>
 
@@ -215,6 +375,16 @@ const Earth: React.FC<{
           transparent
           opacity={0.2}
           side={THREE.BackSide}
+        />
+      </Sphere>
+      
+      {/* Night lights effect on dark side */}
+      <Sphere args={[1.001, 64, 64]}>
+        <meshBasicMaterial
+          color="#ffcc44"
+          transparent
+          opacity={0.15}
+          blending={THREE.AdditiveBlending}
         />
       </Sphere>
 
@@ -318,7 +488,47 @@ const EarthVisualization: React.FC<EarthProps> = ({ data, onSatelliteUpdate }) =
   };
 
   return (
-    <div className="w-full h-96">
+    <div className="relative w-full h-96">
+      {/* Legend */}
+      <div className="absolute top-4 left-4 z-10 bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 border border-purple-500/30">
+        <h4 className="text-sm font-bold text-white mb-2">Coverage Regions</h4>
+        <div className="space-y-1 text-xs">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <span className="text-gray-300">GPS Coverage</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+            <span className="text-gray-300">Communication</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
+            <span className="text-gray-300">Weather Monitor</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            <span className="text-gray-300">ISS Coverage</span>
+          </div>
+          <div className="border-t border-gray-600 my-2 pt-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-gray-300">Critical Health</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-orange-400"></div>
+              <span className="text-gray-300">Degraded</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Info panel */}
+      <div className="absolute top-4 right-4 z-10 bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 border border-purple-500/30">
+        <h4 className="text-sm font-bold text-white mb-1">Interactive View</h4>
+        <p className="text-xs text-gray-400">Drag to rotate • Scroll to zoom</p>
+        <p className="text-xs text-gray-400 mt-1">Colored regions show satellite coverage</p>
+      </div>
+      
       <Canvas camera={{ position: [0, 3, 6], fov: 60 }}>
         <ambientLight intensity={0.2} />
         <pointLight position={[-15, 5, 5]} intensity={2} color="#ffffff" />

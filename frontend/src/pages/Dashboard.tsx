@@ -6,16 +6,30 @@ import StormAlert from '../components/StormAlert';
 import SolarWindChart from '../components/SolarWindChart';
 import SatelliteMonitor from '../components/SatelliteMonitor';
 import RadiationChart from '../components/RadiationChart';
+import AffectedRegionsMap from '../components/AffectedRegionsMap';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
+
+interface SatelliteData {
+  id: string;
+  name: string;
+  health: number;
+  altitude: number;
+  type: string;
+  degradation: number;
+}
 
 const Dashboard: React.FC = () => {
   const [currentData, setCurrentData] = useState<any>(null);
   const [predictions, setPredictions] = useState<any>(null);
-  const [satellites, setSatellites] = useState<any[]>([]);
+  const [impactData, setImpactData] = useState<any>(null);
+  const [satellites, setSatellites] = useState<SatelliteData[]>([]);
   const [radiationLevel, setRadiationLevel] = useState(0);
   const [magneticFieldStrength, setMagneticFieldStrength] = useState(1.0);
+  const [backendConnected, setBackendConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const { messages } = useWebSocket();
+
 
   useEffect(() => {
     fetchCurrentData();
@@ -26,7 +40,29 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (messages.length > 0) {
       const latest = messages[messages.length - 1];
+      console.log('Dashboard: WebSocket message received', latest);
       setCurrentData(latest);
+      
+      // Update predictions from WebSocket
+      if (latest.predictions) {
+        console.log('Dashboard: Predictions received', latest.predictions);
+        setPredictions(latest.predictions.storm_occurrence);
+        setImpactData(latest.predictions.impacts);
+      }
+      
+      // Update satellites from WebSocket if provided
+      if (latest.satellites && latest.satellites.length > 0) {
+        console.log('Dashboard: Updating satellites from WebSocket, count:', latest.satellites.length);
+        const formattedSatellites = latest.satellites.map((sat: any) => ({
+          id: sat.id,
+          name: sat.name,
+          health: sat.health,
+          altitude: sat.altitude,
+          type: sat.type,
+          degradation: sat.degradation
+        }));
+        setSatellites(formattedSatellites);
+      }
     }
   }, [messages]);
 
@@ -47,19 +83,48 @@ const Dashboard: React.FC = () => {
 
   const fetchCurrentData = async () => {
     try {
-      const [dataRes, predRes] = await Promise.all([
+      const [dataRes, predRes, impactRes] = await Promise.all([
         axios.get('http://localhost:8000/api/current-conditions'),
-        axios.get('http://localhost:8000/api/predict/storm')
+        axios.get('http://localhost:8000/api/predict/storm'),
+        axios.post('http://localhost:8000/predict/impact', {
+          bz: currentData?.bz || -5,
+          speed: currentData?.speed || 450,
+          density: currentData?.density || 8,
+          pressure: currentData?.pressure || 2.5,
+          xray_flux: currentData?.xray_flux || 1e-5,
+          proton_flux: currentData?.proton_flux || 10
+        }).catch(() => null)
       ]);
+      
       setCurrentData(dataRes.data);
       setPredictions(predRes.data);
+      if (impactRes) setImpactData(impactRes.data);
+      setBackendConnected(true);
+      setConnectionError(null);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setBackendConnected(false);
+      setConnectionError('Backend server not responding. Please start the server.');
     }
   };
 
   const handleSatelliteUpdate = (updatedSatellites: any[]) => {
+    console.log('Dashboard: Received satellite update, count:', updatedSatellites.length);
     setSatellites(updatedSatellites);
+  };
+
+  // Fleet status calculations
+  const fleetStats = {
+    total: satellites.length,
+    healthy: satellites.filter(s => s.health > 80).length,
+    degraded: satellites.filter(s => s.health > 50 && s.health <= 80).length,
+    critical: satellites.filter(s => s.health <= 50).length,
+    avgHealth: satellites.length > 0 
+      ? (satellites.reduce((sum, s) => sum + s.health, 0) / satellites.length).toFixed(1)
+      : 100,
+    avgDegradation: satellites.length > 0
+      ? (satellites.reduce((sum, s) => sum + s.degradation, 0) / satellites.length).toFixed(1)
+      : 0
   };
 
   return (
@@ -77,12 +142,113 @@ const Dashboard: React.FC = () => {
         </p>
       </motion.div>
 
-      {predictions?.alert_level && (
+      {/* Connection Status Banner */}
+      {!backendConnected && connectionError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-red-500/20 border-2 border-red-500 rounded-lg p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="text-red-500 text-3xl">⚠️</div>
+              <div>
+                <h3 className="text-red-400 font-semibold text-lg">Backend Server Not Connected</h3>
+                <p className="text-red-300 text-sm">{connectionError}</p>
+                <p className="text-red-400 text-xs mt-1">Start with: <code className="bg-black/30 px-2 py-1 rounded">uvicorn backend.main:app --reload</code></p>
+              </div>
+            </div>
+            <button
+              onClick={fetchCurrentData}
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {backendConnected && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4"
+        >
+          <div className="flex items-center space-x-2 text-green-400 text-sm">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>Backend Connected</span>
+          </div>
+        </motion.div>
+      )}
+
+      {predictions?.risk_level && (
         <StormAlert
-          level={predictions.alert_level}
-          probability={predictions.storm_probability}
-          severity={predictions.severity}
+          level={predictions.risk_level}
+          probability={predictions.probability}
+          severity={currentData?.kp_index || 3}
         />
+      )}
+
+      {/* Fleet Status Summary */}
+      {satellites.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 backdrop-blur-lg rounded-lg p-4 border border-purple-500/30">
+            <h3 className="text-lg font-semibold text-white mb-3">Fleet Status Summary</h3>
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-400">{fleetStats.total}</div>
+                <div className="text-xs text-gray-400">Total</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400">{fleetStats.healthy}</div>
+                <div className="text-xs text-gray-400">Healthy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-400">{fleetStats.degraded}</div>
+                <div className="text-xs text-gray-400">Degraded</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-400">{fleetStats.critical}</div>
+                <div className="text-xs text-gray-400">Critical</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-400">{fleetStats.avgHealth}%</div>
+                <div className="text-xs text-gray-400">Avg Health</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-400">{fleetStats.avgDegradation}%</div>
+                <div className="text-xs text-gray-400">Avg Degradation</div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Impact Systems Alert */}
+      {impactData && impactData.affected_systems && impactData.affected_systems.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="text-red-500 text-2xl">⚠</div>
+            <div>
+              <h3 className="text-red-400 font-semibold">
+                {impactData.affected_systems.length} System(s) at Risk
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Affected: {impactData.affected_systems.map((s: string) => 
+                  s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+                ).join(', ')}
+              </p>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       <div className="grid grid-cols-1 gap-6 mb-6">
@@ -94,8 +260,23 @@ const Dashboard: React.FC = () => {
           <h2 className="text-2xl font-semibold text-white mb-4">
             Solar System - Real-Time 3D Visualization
           </h2>
-          <div className="w-full h-[600px]">
-            <SolarSystemVisualization
+          {!backendConnected ? (
+            <div className="w-full h-[600px] flex items-center justify-center bg-slate-900/50 rounded-lg border-2 border-red-500/30">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🛰️</div>
+                <div className="text-red-400 text-xl font-semibold mb-2">Waiting for Backend Connection</div>
+                <div className="text-gray-400 text-sm">Satellites will appear once connected to the server</div>
+                <button
+                  onClick={fetchCurrentData}
+                  className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                >
+                  Connect to Backend
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-[600px]">
+              <SolarSystemVisualization
               radiationLevel={radiationLevel}
               bzValue={currentData?.bz || 0}
               solarWindSpeed={currentData?.speed || 400}
@@ -103,10 +284,13 @@ const Dashboard: React.FC = () => {
               xrayFlux={currentData?.xray_flux || 1e-6}
               magneticFieldStrength={magneticFieldStrength}
               onSatelliteUpdate={handleSatelliteUpdate}
-            />
-          </div>
+              />
+            </div>
+          )}
           <p className="text-xs text-gray-400 mt-2 text-center">
-            Drag to rotate • Scroll to zoom • 6 satellites tracked • Sun radiation and Earth's magnetic field based on real ML model data
+            {backendConnected 
+              ? 'Drag to rotate • Scroll to zoom • 6 satellites tracked • Sun radiation and Earth\'s magnetic field based on real ML model data'
+              : 'Connect to backend to see real-time satellite data'}
           </p>
         </motion.div>
       </div>
@@ -148,6 +332,18 @@ const Dashboard: React.FC = () => {
           <RadiationChart currentRadiation={radiationLevel} />
         </motion.div>
       </div>
+
+      {/* Global Coverage Map */}
+      {satellites.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-6"
+        >
+          <AffectedRegionsMap satellites={satellites} />
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

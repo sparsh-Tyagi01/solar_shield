@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { OrbitControls, Sphere, Stars, Html, Line, Trail, PerspectiveCamera } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Sphere, Stars, Html, Line, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface SolarSystemProps {
@@ -317,12 +317,12 @@ const Satellite: React.FC<{
     // Distance from Sun affects radiation intensity
     const distanceFromSun = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
     const radiationFactor = 1 / (distanceFromSun * distanceFromSun);
-    const degradationRate = radiationLevel * radiationFactor * 0.001;
+    const degradationRate = radiationLevel * radiationFactor * 0.05; // Increased from 0.001 for visibility
     
     const newDegradation = Math.min(100, degradation + degradationRate);
     const newHealth = Math.max(0, 100 - newDegradation * 0.7);
 
-    if (Math.abs(newHealth - health) > 0.5) {
+    if (Math.abs(newHealth - health) > 0.1) { // More sensitive updates
       setHealth(newHealth);
       setDegradation(newDegradation);
       onUpdate(satellite.id, newHealth, newDegradation);
@@ -460,74 +460,40 @@ const SolarRadiation: React.FC<{
 
 // Main Solar System Scene
 const SolarSystemScene: React.FC<SolarSystemProps> = (props) => {
-  const [satellites, setSatellites] = useState<SatelliteData[]>([
-    {
-      id: 'sat-1',
-      name: 'GPS-A',
-      type: 'GPS',
-      health: 100,
-      degradation: 0,
-      altitude: 20200,
-      orbitalPeriod: 40,
-      inclination: Math.PI / 6,
-      phase: 0
-    },
-    {
-      id: 'sat-2',
-      name: 'COMM-1',
-      type: 'Communication',
-      health: 100,
-      degradation: 0,
-      altitude: 35786,
-      orbitalPeriod: 60,
-      inclination: Math.PI / 12,
-      phase: Math.PI / 3
-    },
-    {
-      id: 'sat-3',
-      name: 'WEATHER-SAT',
-      type: 'Weather',
-      health: 100,
-      degradation: 0,
-      altitude: 35786,
-      orbitalPeriod: 60,
-      inclination: 0,
-      phase: Math.PI
-    },
-    {
-      id: 'sat-4',
-      name: 'ISS',
-      type: 'ISS',
-      health: 100,
-      degradation: 0,
-      altitude: 408,
-      orbitalPeriod: 30,
-      inclination: Math.PI / 4,
-      phase: Math.PI / 2
-    },
-    {
-      id: 'sat-5',
-      name: 'GPS-B',
-      type: 'GPS',
-      health: 100,
-      degradation: 0,
-      altitude: 20200,
-      orbitalPeriod: 40,
-      inclination: -Math.PI / 6,
-      phase: Math.PI
-    },
-    {
-      id: 'sat-6',
-      name: 'RESEARCH-X',
-      type: 'Research',
-      health: 100,
-      degradation: 0,
-      altitude: 500,
-      orbitalPeriod: 32,
-      inclination: Math.PI / 3,
-      phase: Math.PI * 1.5
-    }
-  ]);
+  const [satellites, setSatellites] = useState<SatelliteData[]>([]);
+  const [satellitesLoaded, setSatellitesLoaded] = useState(false);
+
+  // Fetch satellite data from backend on mount
+  useEffect(() => {
+    const fetchSatellites = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/satellites');
+        const data = await response.json();
+        console.log('SolarSystemVisualization: Fetched satellites from backend:', data.satellites);
+        
+        // Convert backend format to frontend format
+        const formattedSatellites = data.satellites.map((sat: any) => ({
+          id: sat.id,
+          name: sat.name,
+          type: sat.type,
+          health: sat.health,
+          degradation: sat.degradation,
+          altitude: sat.altitude,
+          orbitalPeriod: sat.orbitalPeriod,
+          inclination: (sat.inclination * Math.PI) / 180, // Convert degrees to radians
+          phase: (sat.phase * Math.PI) / 180
+        }));
+        
+        setSatellites(formattedSatellites);
+        setSatellitesLoaded(true);
+      } catch (error) {
+        console.error('Failed to fetch satellites from backend:', error);
+        setSatellitesLoaded(false);
+      }
+    };
+    
+    fetchSatellites();
+  }, []);
 
   const handleSatelliteUpdate = (id: string, health: number, degradation: number) => {
     setSatellites(prev => {
@@ -543,6 +509,28 @@ const SolarSystemScene: React.FC<SolarSystemProps> = (props) => {
       return updated;
     });
   };
+
+  // Notify parent on mount with initial satellites
+  useEffect(() => {
+    if (props.onSatelliteUpdate && satellites.length > 0) {
+      console.log('SolarSystemVisualization: Sending initial satellites to parent, count:', satellites.length);
+      props.onSatelliteUpdate(satellites);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [satellitesLoaded]); // Only run when satellites are loaded
+
+  // Show loading state if satellites not yet loaded
+  if (!satellitesLoaded || satellites.length === 0) {
+    return (
+      <Html center>
+        <div className="text-white text-center">
+          <div className="text-2xl mb-2">🛰️</div>
+          <div>Loading satellite fleet...</div>
+          <div className="text-xs text-gray-400 mt-1">Fetching from backend</div>
+        </div>
+      </Html>
+    );
+  }
 
   return (
     <>
