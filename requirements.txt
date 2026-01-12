@@ -9,7 +9,7 @@ numpy
 pandas
 scikit-learn
 xgboost<2.1  # Version < 2.1 required for SHAP compatibility
-# tensorflow  # Install separately due to slow download
+tensorflow  # Required for LSTM models
 
 # Model interpretation
 shap  # Requires LLVM 20 (install via: brew install llvm@20)

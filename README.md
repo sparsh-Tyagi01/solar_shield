@@ -1,241 +1,249 @@
-# 🌞 SolarGuard 3D
+# 🌞 SolarShield - AI-Powered Space Weather Intelligence Platform
 
-**AI-Powered 3D Space Weather Intelligence Platform with Realistic Solar System Visualization**
+Real-time solar storm monitoring and prediction system with 3D visualization, satellite tracking, and ML-powered risk assessment.
 
-SolarGuard 3D predicts geomagnetic storm severity and visually simulates real-time Sun → Earth space-weather interactions in a scientifically accurate 3D environment featuring the Sun, Earth, Moon, and 6 tracked satellites.
+![Status](https://img.shields.io/badge/status-active-success)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![React](https://img.shields.io/badge/react-18+-61dafb)
 
-## 🎯 Problem Statement
+## 🚀 Features
 
-Modern society relies heavily on satellites, GPS navigation, aviation communication, and power grids. Solar flares & geomagnetic storms can damage satellites, degrade GPS accuracy, disrupt communication systems, and cause power outages.
-
-Existing systems:
-- ❌ Are 2D charts that are hard to interpret
-- ❌ Provide alerts but no intuitive visualization
-- ❌ Do not show cause → effect chain
-- ❌ Lack real-time satellite health monitoring
-
-## ✨ Our Solution
-
-**AI-powered platform** that predicts geomagnetic storm severity and visually simulates real-time Sun → Earth space-weather interactions in a scientifically accurate 3D environment.
-
-### 🌟 New 3D Solar System Visualization
-
-**Realistic, data-driven 3D visualization featuring:**
-- ☀️ **Dynamic Sun** with solar flares and radiation effects
-- 🌍 **Earth** with magnetic field visualization that responds to solar activity
-- 🌙 **Moon** with realistic orbital mechanics
-- 🛰️ **6 Satellites** (GPS, Communication, Weather, ISS, Research) with:
-  - Real-time health monitoring
-  - Radiation degradation based on distance and solar activity
-  - Individual orbital paths and characteristics
-  - Color-coded health status (green → yellow → orange → red)
-
-**All visualizations are based on real ML model predictions:**
-- Solar radiation intensity from X-ray and proton flux
-- Magnetic field strength from Bz component
-- Satellite degradation from radiation exposure
-- Particle streams showing solar wind
-
-📖 **[View Complete 3D Features Documentation](3D_FEATURES.md)**
-
-## 🧠 AI Models
-
-### Model A: Storm Occurrence Predictor
-- **Question**: Will a geomagnetic storm occur in next 12–24 hrs?
-- **Algorithm**: XGBoost
-- **Output**: Binary (Yes/No) + Probability
-
-### Model B: Storm Severity Predictor
-- **Question**: How severe will the storm be?
-- **Algorithm**: LSTM (Long Short-Term Memory)
-- **Output**: Severity score (0–10)
-
-### Model C: Impact Risk Classifier
-- **Question**: What systems will be affected?
-- **Algorithm**: Random Forest
-- **Output**: Multi-label (Satellites, GPS, Communication, Power Grid)
-
-## 📊 Data Sources
-
-- **NASA OMNI**: IMF Bz, Solar wind speed, Proton density, SYM-H
-- **NOAA GOES**: Proton flux, X-ray flux
-- **Resolution**: 1-minute
-
-## 🚀 Quick Start
-
-### Option 1: One-Command Start (Recommended)
-
-```bash
-# Start both backend and frontend with 3D visualization
-./start_3d_system.sh
-```
-
-Then visit:
-- **Main Dashboard**: http://localhost:3000
-- **3D Solar System**: http://localhost:3000/3d-view
-- **API Docs**: http://localhost:8000/docs
-
-### Option 2: Manual Setup
-
-#### 1. Installation
-
-```bash
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On macOS/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install frontend dependencies
-cd frontend && npm install && cd ..
-```
-
-#### 2. Train Models
-
-```bash
-# Fetch historical data and train all models
-python -m backend.ml.train_pipeline
-```
-
-#### 3. Start Backend
-
-```bash
-# Terminal 1: Start FastAPI server
-python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### 4. Start Frontend
-
-```bash
-# Terminal 2: Start React app
-cd frontend
-npm start
-```
-
-### 5. API Documentation
-
-Visit: http://localhost:8000/docs
-
-## 📡 API Endpoints
-
-- `POST /predict/storm` - Predict storm occurrence
-- `POST /predict/severity` - Predict storm severity  
-- `POST /predict/impact` - Classify impact zones
-- `GET /explain/shap` - Get SHAP explanations
-- `GET /api/current-conditions` - Get current space weather
-- `WebSocket /ws` - Real-time data stream for 3D visualization
-
-## 🏗️ Architecture
-
-```
-NASA OMNI + NOAA GOES
-        ↓
-Data Ingestion & Cleaning
-        ↓
-Feature Engineering
-        ↓
-AI Models (3 models)
-        ↓
-Prediction API (FastAPI)
-        ↓
-Real-Time Data Stream (WebSocket)
-        ↓
-3D Visualization Engine (Three.js)
-        ↓
-React Dashboard + Full-Screen 3D View
-```
-
-### 3D Visualization Pipeline
-
-```
-ML Model Predictions → Backend API → WebSocket
-                                        ↓
-                              Frontend State Management
-                                        ↓
-        ┌───────────────────────────────┴──────────────────────────┐
-        ↓                               ↓                           ↓
-   Sun Radiation              Earth Magnetic Field          Satellite Health
-   (X-ray flux)                   (Bz component)          (Distance + Radiation)
-        ↓                               ↓                           ↓
-   Visual Effects             Field Line Colors              Color Coding
-   (Flares, Particles)        (Blue/Red transition)         (Green → Red)
-```
+- **Real-time Solar Data Monitoring** - Live NOAA & NASA data feeds
+- **AI Storm Prediction** - XGBoost & LSTM models for occurrence and severity
+- **3D Solar System Visualization** - Interactive Earth, Sun, satellites
+- **Satellite Fleet Monitoring** - Track 6+ satellites with health metrics
+- **Impact Risk Analysis** - Assess threats to infrastructure and operations
+- **WebSocket Real-time Updates** - Live data streaming to frontend
+- **Historical Analysis** - Analyze past solar events and patterns
 
 ## 📁 Project Structure
 
 ```
 SolarSheild/
-├── backend/
-│   ├── main.py                 # FastAPI app with WebSocket
-│   ├── config.py               # Configuration
-│   ├── data/
-│   │   ├── fetcher.py          # Data ingestion
-│   │   └── feature_engineer.py # Feature engineering
-│   ├── ml/
-│   │   ├── storm_occurrence.py # Model A (Random Forest)
-│   │   ├── storm_severity.py   # Model B (LSTM)
-│   │   ├── impact_risk.py      # Model C (Random Forest)
-│   │   └── train_pipeline.py   # Training script
-│   └── utils/
-│       ├── helpers.py
-│       └── logger.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── SolarSystemVisualization.tsx  # 🌟 3D Solar System
-│   │   │   ├── Navigation.tsx
-│   │   │   ├── RealTimeMetrics.tsx
-│   │   │   ├── SatelliteMonitor.tsx
-│   │   │   └── ...
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── SolarSystem3DView.tsx  # 🌟 Full-screen 3D
-│   │   │   ├── StormPrediction.tsx
-│   │   │   └── ...
-│   │   └── context/
-│   │       └── WebSocketContext.tsx
-│   └── package.json
-├── data/
-│   ├── raw/                    # Raw space weather data
-│   └── processed/              # Engineered features
-├── models/                     # Trained ML models (.pkl, .h5)
-├── logs/                       # Application logs
-├── start_3d_system.sh         # 🌟 One-command startup script
-├── 3D_FEATURES.md             # 🌟 Complete 3D features documentation
-├── 3D_VISUALIZATION_GUIDE.md  # 🌟 Technical implementation guide
-└── requirements.txt
+├── backend/              # FastAPI backend API
+│   ├── data/            # Data fetching & processing
+│   ├── ml/              # ML models (XGBoost, LSTM)
+│   └── utils/           # Logging & helpers
+├── frontend/            # React + TypeScript UI
+│   └── src/
+│       ├── components/  # Reusable UI components
+│       ├── pages/       # Application pages
+│       └── context/     # WebSocket & state management
+├── data/                # Training & processed data
+├── models/              # Trained ML model files
+├── docs/                # Documentation
+├── tests/               # Test suites
+└── scripts/             # Setup & training scripts
 ```
 
-## 🎮 Technology Stack
+## 🛠️ Quick Start
 
-- **Backend**: Python, FastAPI
-- **ML**: XGBoost, TensorFlow, PyTorch, SHAP
-- **Data**: Pandas, NumPy
-- **Real-time**: WebSockets
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- npm or yarn
 
-## 🔬 Feature Engineering
+### Local Development
 
-### Rolling Features (Energy Buildup)
-- Bz rolling mean (30 min, 60 min)
-- Solar wind pressure trend
-- Proton flux accumulation
+**1. Backend Setup:**
+```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
-### Gradient Features (Shock Detection)
-- ΔBz / Δt
-- ΔProtonFlux / Δt
-- Pressure spikes
+# Install dependencies
+pip install -r requirements.txt
 
-## 🎯 Success Metrics
+# Run backend server
+uvicorn backend.main:app --reload
+```
 
-- **Prediction Accuracy**: >85% for storm occurrence
-- **RMSE for Severity**: <1.5 points (0-10 scale)
-- **API Response Time**: <200ms
+Backend runs at: http://localhost:8000
+API docs at: http://localhost:8000/docs
 
-## 📄 License
+**2. Frontend Setup:**
+```bash
+cd frontend
+npm install
+npm start
+```
 
-MIT License
+Frontend runs at: http://localhost:3000
 
-## 🤝 Contributors
+## 🐳 Docker Deployment
 
-Built for NASA Space Apps Challenge 2026
+**Quick start with Docker Compose:**
+```bash
+docker-compose up --build
+```
+
+Access:
+- Frontend: http://localhost
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
+
+**Individual containers:**
+```bash
+# Backend
+docker build -f backend/Dockerfile -t solarsheild-backend .
+docker run -p 8000:8000 solarsheild-backend
+
+# Frontend
+cd frontend
+docker build -t solarsheild-frontend .
+docker run -p 80:80 solarsheild-frontend
+```
+
+## 📚 Documentation
+
+- [Deployment Guide](DEPLOYMENT.md) - Production deployment instructions
+- [Backend README](backend/README.md) - Backend API documentation
+- [Frontend README](frontend/README.md) - Frontend development guide
+- [Full Documentation](docs/) - Complete technical documentation
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+python tests/test_integration.py
+
+# Test ML models
+python tests/test_impact_model.py
+
+# Test components
+python tests/test_components.py
+```
+
+## 🔧 Configuration
+
+### Backend Environment Variables
+Create `.env` in project root:
+```env
+LOG_LEVEL=INFO
+PYTHONUNBUFFERED=1
+```
+
+### Frontend Environment Variables
+Create `.env` in frontend directory:
+```env
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_WS_URL=ws://localhost:8000
+```
+
+## 📊 Data Sources
+
+- **NOAA SWPC** - Real-time solar wind and magnetic field data
+- **NASA** - Solar flare and CME data
+- **TLE Data** - Satellite orbital elements for tracking
+
+## 🤖 ML Models
+
+### Storm Occurrence Predictor (XGBoost)
+- Binary classification: Will a storm occur?
+- Features: Solar wind speed, Bz, density, pressure
+- Output: Probability + Yes/No prediction
+
+### Storm Severity Predictor (LSTM)
+- Multi-class classification: G1-G5 severity scale
+- Time-series analysis of solar wind parameters
+- Output: Severity level with confidence
+
+### Impact Risk Model
+- Infrastructure risk assessment
+- Satellite vulnerability analysis
+- Regional impact predictions
+
+## 🛰️ Satellite Tracking
+
+Monitors 6 satellites:
+- GPS (NAVSTAR)
+- Communication (GOES)
+- Weather (NOAA)
+- ISS
+- Research satellites (x2)
+
+Real-time metrics:
+- Orbital position & velocity
+- Radiation exposure
+- System health status
+- Predicted degradation
+
+## 🌐 API Endpoints
+
+Key endpoints:
+- `GET /api/realtime` - Current solar conditions
+- `GET /api/prediction` - Storm predictions
+- `GET /api/satellites` - Satellite status
+- `GET /api/impact` - Impact risk analysis
+- `WS /ws/stream` - Real-time data stream
+
+Full API documentation: http://localhost:8000/docs
+
+## 🎨 Frontend Stack
+
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Three.js** - 3D visualization
+- **TailwindCSS** - Styling
+- **Recharts** - Data visualization
+- **WebSocket** - Real-time updates
+
+## 🏗️ Backend Stack
+
+- **FastAPI** - Modern Python web framework
+- **scikit-learn** - ML model training
+- **TensorFlow/Keras** - LSTM neural networks
+- **pandas** - Data processing
+- **requests** - API data fetching
+
+## 📈 Performance
+
+- Real-time data updates every 5 seconds
+- WebSocket latency < 100ms
+- ML inference < 50ms
+- 3D rendering at 60fps
+
+## 🔒 Security
+
+- CORS configuration for API access
+- Input validation on all endpoints
+- Rate limiting on data endpoints
+- Secure WebSocket connections
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 👥 Team
+
+AI-powered space weather monitoring system built with modern web technologies.
+
+## 📞 Support
+
+For issues and questions:
+- Check [Documentation](docs/)
+- Review [Issues](issues/)
+- See [Deployment Guide](DEPLOYMENT.md)
+
+## 🔄 Updates
+
+- ✅ Real-time data streaming
+- ✅ ML prediction models
+- ✅ 3D visualization
+- ✅ Satellite tracking
+- ✅ Docker deployment
+- 🚧 Mobile app (coming soon)
+- 🚧 Advanced alerting system
+- 🚧 Historical data analysis tools
+
+---
+
+Built with ❤️ using Python, React, and AI
