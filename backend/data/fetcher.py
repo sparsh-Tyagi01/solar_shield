@@ -214,21 +214,39 @@ class SpaceWeatherDataFetcher:
             
             now = datetime.utcnow()
             
-            # Fetch solar wind speed
-            speed_response = self.session.get(plasma_url, timeout=10)
+            # Fetch solar wind speed with better error handling
             speed = 400.0
-            if speed_response.status_code == 200:
-                speed_data = speed_response.json()
-                if len(speed_data) > 0 and 'WindSpeed' in speed_data[0]:
-                    speed = float(speed_data[0]['WindSpeed'])
+            try:
+                speed_response = self.session.get(plasma_url, timeout=10)
+                speed_response.raise_for_status()
+                if speed_response.status_code == 200:
+                    speed_data = speed_response.json()
+                    if isinstance(speed_data, dict) and 'WindSpeed' in speed_data:
+                        speed = float(speed_data['WindSpeed'])
+                    elif isinstance(speed_data, list) and len(speed_data) > 0:
+                        if isinstance(speed_data[0], dict) and 'WindSpeed' in speed_data[0]:
+                            speed = float(speed_data[0]['WindSpeed'])
+            except (KeyError, IndexError, ValueError, TypeError) as parse_error:
+                logger.warning(f"Could not parse wind speed from NOAA response: {parse_error}, using default")
+            except Exception as fetch_error:
+                logger.warning(f"Failed to fetch wind speed: {fetch_error}, using default")
             
-            # Fetch magnetic field
-            mag_response = self.session.get(mag_url, timeout=10)
+            # Fetch magnetic field with better error handling
             bz = 0.0
-            if mag_response.status_code == 200:
-                mag_data = mag_response.json()
-                if len(mag_data) > 0 and 'Bz' in mag_data[0]:
-                    bz = float(mag_data[0]['Bz'])
+            try:
+                mag_response = self.session.get(mag_url, timeout=10)
+                mag_response.raise_for_status()
+                if mag_response.status_code == 200:
+                    mag_data = mag_response.json()
+                    if isinstance(mag_data, dict) and 'Bz' in mag_data:
+                        bz = float(mag_data['Bz'])
+                    elif isinstance(mag_data, list) and len(mag_data) > 0:
+                        if isinstance(mag_data[0], dict) and 'Bz' in mag_data[0]:
+                            bz = float(mag_data[0]['Bz'])
+            except (KeyError, IndexError, ValueError, TypeError) as parse_error:
+                logger.warning(f"Could not parse Bz from NOAA response: {parse_error}, using default")
+            except Exception as fetch_error:
+                logger.warning(f"Failed to fetch magnetic field: {fetch_error}, using default")
             
             # Calculate other parameters
             density = 5.0  # Default, not available in summary
