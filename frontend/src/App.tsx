@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import StormPrediction from './pages/StormPrediction';
 import ImpactAnalysis from './pages/ImpactAnalysis';
@@ -13,14 +14,21 @@ function App() {
   return (
     <WebSocketProvider>
       <Router>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-          <Navigation />
+        <div className="min-h-screen bg-gray-50">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/3d-view" element={<SolarSystem3DView />} />
-            <Route path="/prediction" element={<StormPrediction />} />
-            <Route path="/impact" element={<ImpactAnalysis />} />
-            <Route path="/history" element={<HistoricalData />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/*" element={
+              <>
+                <Navigation />
+                <Routes>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/3d-view" element={<SolarSystem3DView />} />
+                  <Route path="/prediction" element={<StormPrediction />} />
+                  <Route path="/impact" element={<ImpactAnalysis />} />
+                  <Route path="/history" element={<HistoricalData />} />
+                </Routes>
+              </>
+            } />
           </Routes>
         </div>
       </Router>

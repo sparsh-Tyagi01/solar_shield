@@ -36,10 +36,10 @@ const HistoricalData: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold text-white mb-2">
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">
           Historical Data
         </h1>
-        <p className="text-gray-300">
+        <p className="text-gray-600">
           Solar wind and geomagnetic activity archive
         </p>
       </motion.div>
@@ -51,8 +51,8 @@ const HistoricalData: React.FC = () => {
             onClick={() => setTimeRange(range)}
             className={`px-4 py-2 rounded-lg transition-colors ${
               timeRange === range
-                ? 'bg-purple-600 text-white'
-                : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-100'
             }`}
           >
             {range}
@@ -61,29 +61,30 @@ const HistoricalData: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="text-white text-center py-8">Loading data...</div>
+        <div className="text-gray-800 text-center py-8">Loading data...</div>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+          className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
         >
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-              <XAxis dataKey="time" stroke="#999" />
-              <YAxis stroke="#999" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="time" stroke="#4b5563" style={{ fontSize: '14px', fontWeight: 500 }} />
+              <YAxis stroke="#4b5563" style={{ fontSize: '14px', fontWeight: 500 }} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #475569',
+                  backgroundColor: '#fff',
+                  border: '2px solid #e5e7eb',
                   borderRadius: '8px',
+                  color: '#1f2937'
                 }}
               />
-              <Legend />
-              <Line type="monotone" dataKey="speed" stroke="#8b5cf6" name="Speed (km/s)" />
-              <Line type="monotone" dataKey="bz" stroke="#3b82f6" name="Bz (nT)" />
-              <Line type="monotone" dataKey="density" stroke="#10b981" name="Density (p/cm³)" />
+              <Legend wrapperStyle={{ color: '#4b5563', fontWeight: 500 }} />
+              <Line type="monotone" dataKey="speed" stroke="#2563eb" name="Speed (km/s)" strokeWidth={2} />
+              <Line type="monotone" dataKey="bz" stroke="#dc2626" name="Bz (nT)" strokeWidth={2} />
+              <Line type="monotone" dataKey="density" stroke="#059669" name="Density (p/cm³)" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>

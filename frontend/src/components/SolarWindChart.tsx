@@ -28,20 +28,22 @@ const SolarWindChart: React.FC = () => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-        <XAxis dataKey="time" stroke="#999" />
-        <YAxis stroke="#999" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <XAxis dataKey="time" stroke="#475569" style={{ fontSize: '12px' }} />
+        <YAxis stroke="#475569" style={{ fontSize: '12px' }} />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1e293b',
-            border: '1px solid #475569',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
             borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           }}
+          labelStyle={{ color: '#1e293b', fontWeight: 'bold' }}
         />
-        <Legend />
-        <Line type="monotone" dataKey="speed" stroke="#8b5cf6" name="Speed (km/s)" />
-        <Line type="monotone" dataKey="bz" stroke="#3b82f6" name="Bz (nT)" />
-        <Line type="monotone" dataKey="density" stroke="#10b981" name="Density (p/cm³)" />
+        <Legend wrapperStyle={{ fontSize: '12px', color: '#475569' }} />
+        <Line type="monotone" dataKey="speed" stroke="#2563eb" strokeWidth={2} name="Speed (km/s)" dot={false} />
+        <Line type="monotone" dataKey="bz" stroke="#dc2626" strokeWidth={2} name="Bz (nT)" dot={false} />
+        <Line type="monotone" dataKey="density" stroke="#10b981" strokeWidth={2} name="Density (p/cm³)" dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

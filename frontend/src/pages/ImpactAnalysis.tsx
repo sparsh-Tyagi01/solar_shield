@@ -72,8 +72,8 @@ const ImpactAnalysis: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="text-white text-2xl mb-2">Loading impact analysis...</div>
-          <div className="text-gray-400 text-sm">Connecting to backend...</div>
+          <div className="text-gray-800 text-2xl mb-2">Loading impact analysis...</div>
+          <div className="text-gray-600 text-sm">Connecting to backend...</div>
         </div>
       </div>
     );
@@ -83,12 +83,12 @@ const ImpactAnalysis: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="text-red-400 text-2xl mb-4">⚠️ Backend Not Connected</div>
-          <div className="text-gray-400 text-sm mb-4">{error}</div>
+          <div className="text-red-600 text-2xl mb-4">⚠️ Backend Not Connected</div>
+          <div className="text-gray-600 text-sm mb-4">{error}</div>
           <div className="text-gray-500 text-xs">Start the backend with: uvicorn backend.main:app --reload</div>
           <button 
             onClick={fetchImpactData}
-            className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             Retry Connection
           </button>
@@ -127,30 +127,30 @@ const ImpactAnalysis: React.FC = () => {
   const getStatusColor = (status: string, affected: boolean) => {
     // If affected, always show warning colors regardless of status
     if (affected) {
-      return 'text-red-500';
+      return 'text-red-600';
     }
     switch (status) {
-      case 'CRITICAL': return 'text-red-500';
-      case 'HIGH': return 'text-orange-500';
-      case 'MODERATE': return 'text-yellow-500';
-      case 'LOW': return 'text-green-500';
-      case 'MINIMAL': return 'text-blue-500';
-      default: return 'text-gray-500';
+      case 'CRITICAL': return 'text-red-600';
+      case 'HIGH': return 'text-orange-600';
+      case 'MODERATE': return 'text-yellow-700';
+      case 'LOW': return 'text-green-600';
+      case 'MINIMAL': return 'text-blue-600';
+      default: return 'text-gray-600';
     }
   };
 
   const getStatusBadgeColor = (status: string, affected: boolean) => {
     // If affected, always show danger colors
     if (affected) {
-      return 'bg-red-500/30 border-red-500 text-red-300';
+      return 'bg-red-100 border-red-600 text-red-700';
     }
     switch (status) {
-      case 'CRITICAL': return 'bg-red-500/20 border-red-500 text-red-400';
-      case 'HIGH': return 'bg-orange-500/20 border-orange-500 text-orange-400';
-      case 'MODERATE': return 'bg-yellow-500/20 border-yellow-500 text-yellow-400';
-      case 'LOW': return 'bg-green-500/20 border-green-500 text-green-400';
-      case 'MINIMAL': return 'bg-blue-500/20 border-blue-500 text-blue-400';
-      default: return 'bg-gray-500/20 border-gray-500 text-gray-400';
+      case 'CRITICAL': return 'bg-red-100 border-red-600 text-red-700';
+      case 'HIGH': return 'bg-orange-100 border-orange-600 text-orange-700';
+      case 'MODERATE': return 'bg-yellow-100 border-yellow-600 text-yellow-800';
+      case 'LOW': return 'bg-green-100 border-green-600 text-green-700';
+      case 'MINIMAL': return 'bg-blue-100 border-blue-600 text-blue-700';
+      default: return 'bg-gray-100 border-gray-600 text-gray-700';
     }
   };
 
@@ -163,14 +163,14 @@ const ImpactAnalysis: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold text-white mb-2">
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">
           Infrastructure Impact Analysis
         </h1>
-        <p className="text-gray-300">
+        <p className="text-gray-600">
           Risk assessment for critical systems
         </p>
         {error && (
-          <div className="mt-2 text-yellow-400 text-sm">⚠ {error}</div>
+          <div className="mt-2 text-orange-600 text-sm">⚠ {error}</div>
         )}
       </motion.div>
 
@@ -179,15 +179,15 @@ const ImpactAnalysis: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4"
+          className="mb-6 bg-red-50 border-2 border-red-600 rounded-lg p-4"
         >
           <div className="flex items-center space-x-3">
-            <div className="text-red-500 text-2xl">⚠</div>
+            <div className="text-red-600 text-2xl">⚠</div>
             <div>
-              <h3 className="text-red-400 font-semibold text-lg">
+              <h3 className="text-red-700 font-semibold text-lg">
                 {affectedCount} System{affectedCount > 1 ? 's' : ''} at Risk
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-gray-700 text-sm">
                 Affected: {impactData?.affected_systems.join(', ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
               </p>
             </div>
@@ -199,29 +199,30 @@ const ImpactAnalysis: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+          className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Risk Distribution
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="#444" />
-              <PolarAngleAxis dataKey="category" stroke="#999" />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#999" />
+              <PolarGrid stroke="#d1d5db" />
+              <PolarAngleAxis dataKey="category" stroke="#4b5563" style={{ fontSize: '14px', fontWeight: 500 }} />
+              <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#4b5563" />
               <Radar 
                 name="Risk Level" 
                 dataKey="risk" 
-                stroke="#8b5cf6" 
-                fill="#8b5cf6" 
-                fillOpacity={0.6} 
+                stroke="#dc2626" 
+                fill="#ef4444" 
+                fillOpacity={0.3} 
+                strokeWidth={2}
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#1e293b', 
-                  border: '1px solid #8b5cf6',
+                  backgroundColor: '#fff', 
+                  border: '2px solid #e5e7eb',
                   borderRadius: '8px',
-                  color: '#fff'
+                  color: '#1f2937'
                 }}
               />
             </RadarChart>
@@ -232,9 +233,9 @@ const ImpactAnalysis: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+          className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Impact Details
           </h2>
           <div className="space-y-4">
@@ -242,9 +243,9 @@ const ImpactAnalysis: React.FC = () => {
               <div key={item.category} className="relative">
                 <div className="flex justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-300 font-medium">{item.category}</span>
+                    <span className="text-gray-800 font-medium">{item.category}</span>
                     {item.affected && (
-                      <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/50">
+                      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full border-2 border-red-600">
                         AFFECTED
                       </span>
                     )}
@@ -253,14 +254,14 @@ const ImpactAnalysis: React.FC = () => {
                     {item.risk.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-3 rounded-full transition-all duration-500 ${
-                      item.affected ? 'bg-red-500 animate-pulse' :
-                      item.risk > 70 ? 'bg-red-500' : 
-                      item.risk > 40 ? 'bg-orange-500' : 
-                      item.risk > 20 ? 'bg-yellow-500' :
-                      'bg-green-500'
+                      item.affected ? 'bg-red-600 animate-pulse' :
+                      item.risk > 70 ? 'bg-red-600' : 
+                      item.risk > 40 ? 'bg-orange-600' : 
+                      item.risk > 20 ? 'bg-yellow-600' :
+                      'bg-green-600'
                     }`}
                     style={{ width: `${item.risk}%` }}
                   />
@@ -284,14 +285,14 @@ const ImpactAnalysis: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className={`bg-slate-800/50 backdrop-blur-lg rounded-lg p-4 border-2 ${
-              item.affected ? 'border-red-500 bg-red-500/10' : 'border-purple-500/20'
+            className={`bg-white rounded-lg p-4 border-2 shadow-lg ${
+              item.affected ? 'border-red-600 bg-red-50' : 'border-gray-200'
             }`}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-white">{item.category}</h3>
+              <h3 className="text-lg font-semibold text-gray-800">{item.category}</h3>
               {item.affected && (
-                <div className="text-red-500 text-2xl animate-pulse">⚠️</div>
+                <div className="text-red-600 text-2xl animate-pulse">⚠️</div>
               )}
             </div>
             
@@ -299,11 +300,11 @@ const ImpactAnalysis: React.FC = () => {
               {item.risk.toFixed(0)}%
             </div>
             
-            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeColor(item.status, item.affected)}`}>
+            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border-2 ${getStatusBadgeColor(item.status, item.affected)}`}>
               {item.affected ? '⚠ AFFECTED' : item.status}
             </div>
             
-            <div className={`mt-3 text-xs font-semibold ${item.affected ? 'text-red-400' : 'text-gray-400'}`}>
+            <div className={`mt-3 text-xs font-semibold ${item.affected ? 'text-red-700' : 'text-gray-600'}`}>
               {item.affected ? 
                 '🔴 System is currently at risk' : 
                 '✓ System operating normally'
@@ -315,7 +316,7 @@ const ImpactAnalysis: React.FC = () => {
 
       {/* Timestamp */}
       {impactData?.timestamp && (
-        <div className="mt-6 text-center text-sm text-gray-400">
+        <div className="mt-6 text-center text-sm text-gray-600">
           Last updated: {new Date(impactData.timestamp).toLocaleString()}
         </div>
       )}

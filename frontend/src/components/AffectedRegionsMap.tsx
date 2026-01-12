@@ -452,21 +452,21 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+      className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
     >
-      <h2 className="text-2xl font-semibold text-white mb-4">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
         Global Coverage Map - Affected Regions
       </h2>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-gray-600 mb-4">
         Real-time satellite coverage and health status visualization
       </p>
       
       {satellites.length === 0 ? (
-        <div className="w-full h-96 flex items-center justify-center bg-slate-900/50 rounded-lg border border-purple-500/20">
+        <div className="w-full h-96 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-300">
           <div className="text-center">
             <div className="text-4xl mb-2">🛰️</div>
-            <div className="text-gray-400">Waiting for satellite data...</div>
-            <div className="text-xs text-gray-500 mt-2">Data will appear once satellites are tracked</div>
+            <div className="text-gray-700">Waiting for satellite data...</div>
+            <div className="text-xs text-gray-600 mt-2">Data will appear once satellites are tracked</div>
           </div>
         </div>
       ) : (
@@ -476,7 +476,7 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
               ref={canvasRef}
               width={1200}
               height={600}
-              className="w-full h-full rounded-lg border border-purple-500/30 shadow-lg cursor-crosshair"
+              className="w-full h-full rounded-lg border-2 border-gray-300 shadow-lg cursor-crosshair"
               style={{ imageRendering: 'auto' }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
@@ -485,46 +485,46 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
             {/* Tooltip for hovered satellite */}
             {hoveredSatellite && (
               <div
-                className="absolute bg-slate-900/95 backdrop-blur-sm border border-purple-500/50 rounded-lg p-3 shadow-xl pointer-events-none z-10"
+                className="absolute bg-white border-2 border-gray-300 rounded-lg p-3 shadow-xl pointer-events-none z-10"
                 style={{
                   left: `${mousePos.x + 15}px`,
                   top: `${mousePos.y + 15}px`,
                 }}
               >
-                <div className="text-sm font-bold text-white mb-1">
+                <div className="text-sm font-bold text-gray-800 mb-1">
                   {hoveredSatellite.satelliteName}
                 </div>
-                <div className="text-xs text-gray-300 space-y-1">
-                  <div>Type: <span className="text-blue-400">{hoveredSatellite.type}</span></div>
+                <div className="text-xs text-gray-700 space-y-1">
+                  <div>Type: <span className="text-blue-600 font-semibold">{hoveredSatellite.type}</span></div>
                   <div>Health: <span className={
-                    hoveredSatellite.health > 80 ? 'text-green-400' :
-                    hoveredSatellite.health > 50 ? 'text-yellow-400' :
-                    'text-red-400'
+                    hoveredSatellite.health > 80 ? 'text-green-600 font-semibold' :
+                    hoveredSatellite.health > 50 ? 'text-yellow-600 font-semibold' :
+                    'text-red-600 font-semibold'
                   }>{hoveredSatellite.health.toFixed(1)}%</span></div>
-                  <div>Position: <span className="text-cyan-400">
+                  <div>Position: <span className="text-blue-600 font-semibold">
                     {hoveredSatellite.lat.toFixed(2)}°, {hoveredSatellite.lon.toFixed(2)}°
                   </span></div>
-                  <div>Coverage: <span className="text-purple-400">{(hoveredSatellite.radius * 100).toFixed(0)} km</span></div>
+                  <div>Coverage: <span className="text-red-600 font-semibold">{(hoveredSatellite.radius * 100).toFixed(0)} km</span></div>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-400">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-700">
             {satellites.map((sat) => (
               <div key={sat.id} className="flex items-center space-x-2">
                 <div 
                   className={`w-2 h-2 rounded-full ${
-                    sat.health > 80 ? 'bg-blue-400' :
-                    sat.health > 50 ? 'bg-orange-400' :
-                    'bg-red-400'
+                    sat.health > 80 ? 'bg-blue-600' :
+                    sat.health > 50 ? 'bg-orange-600' :
+                    'bg-red-600'
                   }`}
                 />
-                <span className="truncate">{sat.name}</span>
-                <span className={`ml-auto ${
-                  sat.health > 80 ? 'text-green-400' :
-                  sat.health > 50 ? 'text-yellow-400' :
-                  'text-red-400'
+                <span className="truncate font-medium">{sat.name}</span>
+                <span className={`ml-auto font-semibold ${
+                  sat.health > 80 ? 'text-green-600' :
+                  sat.health > 50 ? 'text-yellow-700' :
+                  'text-red-600'
                 }`}>
                   {sat.health.toFixed(0)}%
                 </span>

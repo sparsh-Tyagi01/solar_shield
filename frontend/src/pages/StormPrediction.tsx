@@ -27,7 +27,7 @@ const StormPrediction: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-white text-2xl">Loading predictions...</div>
+        <div className="text-gray-800 text-2xl">Loading predictions...</div>
       </div>
     );
   }
@@ -39,10 +39,10 @@ const StormPrediction: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold text-white mb-2">
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">
           Storm Prediction Analysis
         </h1>
-        <p className="text-gray-300">
+        <p className="text-gray-600">
           AI-powered geomagnetic storm forecasting
         </p>
       </motion.div>
@@ -51,10 +51,10 @@ const StormPrediction: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg p-6 shadow-2xl"
+          className="bg-blue-50 rounded-lg p-6 shadow-lg border-2 border-blue-600"
         >
-          <h3 className="text-white text-lg mb-2">Storm Probability</h3>
-          <div className="text-4xl font-bold text-white">
+          <h3 className="text-blue-700 text-lg mb-2 font-semibold">Storm Probability</h3>
+          <div className="text-4xl font-bold text-blue-600">
             {((predictions?.storm_probability || 0) * 100).toFixed(1)}%
           </div>
         </motion.div>
@@ -63,10 +63,10 @@ const StormPrediction: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-red-600 to-orange-600 rounded-lg p-6 shadow-2xl"
+          className="bg-red-50 rounded-lg p-6 shadow-lg border-2 border-red-600"
         >
-          <h3 className="text-white text-lg mb-2">Severity Score</h3>
-          <div className="text-4xl font-bold text-white">
+          <h3 className="text-red-700 text-lg mb-2 font-semibold">Severity Score</h3>
+          <div className="text-4xl font-bold text-red-600">
             {(predictions?.severity || 0).toFixed(2)}
           </div>
         </motion.div>
@@ -75,10 +75,10 @@ const StormPrediction: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-yellow-600 to-red-600 rounded-lg p-6 shadow-2xl"
+          className="bg-orange-50 rounded-lg p-6 shadow-lg border-2 border-orange-600"
         >
-          <h3 className="text-white text-lg mb-2">Alert Level</h3>
-          <div className="text-4xl font-bold text-white uppercase">
+          <h3 className="text-orange-700 text-lg mb-2 font-semibold">Alert Level</h3>
+          <div className="text-4xl font-bold text-orange-600 uppercase">
             {predictions?.alert_level || 'Normal'}
           </div>
         </motion.div>
@@ -88,15 +88,15 @@ const StormPrediction: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+        className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
       >
-        <h2 className="text-2xl font-semibold text-white mb-4">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Prediction Details
         </h2>
-        <div className="text-gray-300 space-y-2">
-          <p><span className="font-semibold">Model Confidence:</span> {((predictions?.confidence || 0.85) * 100).toFixed(1)}%</p>
-          <p><span className="font-semibold">Forecast Window:</span> Next 6-24 hours</p>
-          <p><span className="font-semibold">Last Updated:</span> {new Date().toLocaleString()}</p>
+        <div className="text-gray-700 space-y-2">
+          <p><span className="font-semibold text-gray-800">Model Confidence:</span> {((predictions?.confidence || 0.85) * 100).toFixed(1)}%</p>
+          <p><span className="font-semibold text-gray-800">Forecast Window:</span> Next 6-24 hours</p>
+          <p><span className="font-semibold text-gray-800">Last Updated:</span> {new Date().toLocaleString()}</p>
         </div>
       </motion.div>
     </div>

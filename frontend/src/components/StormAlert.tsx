@@ -11,30 +11,30 @@ interface AlertProps {
 const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0 }) => {
   const alertConfig = {
     critical: {
-      bg: 'bg-red-500/20',
+      bg: 'bg-red-50',
       border: 'border-red-500',
-      text: 'text-red-300',
+      text: 'text-red-700',
       icon: ExclamationTriangleIcon,
       message: 'CRITICAL: Major geomagnetic storm imminent',
     },
     warning: {
-      bg: 'bg-orange-500/20',
+      bg: 'bg-orange-50',
       border: 'border-orange-500',
-      text: 'text-orange-300',
+      text: 'text-orange-700',
       icon: ExclamationTriangleIcon,
       message: 'WARNING: Moderate storm conditions expected',
     },
     watch: {
-      bg: 'bg-yellow-500/20',
+      bg: 'bg-yellow-50',
       border: 'border-yellow-500',
-      text: 'text-yellow-300',
+      text: 'text-yellow-700',
       icon: ExclamationTriangleIcon,
       message: 'WATCH: Minor storm activity possible',
     },
     normal: {
-      bg: 'bg-green-500/20',
+      bg: 'bg-green-50',
       border: 'border-green-500',
-      text: 'text-green-300',
+      text: 'text-green-700',
       icon: ShieldCheckIcon,
       message: 'All systems normal - No storm activity',
     },
@@ -56,7 +56,7 @@ const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0 }) 
             <h3 className={`text-xl font-bold ${config.text}`}>
               {config.message}
             </h3>
-            <p className="text-gray-300 mt-1">
+            <p className="text-slate-700 mt-1">
               Storm Probability: <span className="font-semibold">{(probability * 100).toFixed(1)}%</span>
               {severity > 0 && (
                 <span className="ml-4">

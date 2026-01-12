@@ -41,75 +41,79 @@ const RadiationChart: React.FC<RadiationChartProps> = ({ currentRadiation }) => 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 border border-purple-500/20"
+      className="bg-white rounded-lg p-6 border-2 border-gray-200 shadow-lg"
     >
-      <h3 className="text-xl font-semibold text-white mb-4">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4">
         Solar Radiation Exposure (Real-Time)
       </h3>
       <ResponsiveContainer width="100%" height={250}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="radiationGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ff6600" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#ff6600" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="#dc2626" stopOpacity={0.4}/>
+              <stop offset="95%" stopColor="#dc2626" stopOpacity={0.05}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-          <XAxis dataKey="time" stroke="#999" />
-          <YAxis stroke="#999" label={{ value: 'Radiation (units)', angle: -90, position: 'insideLeft', fill: '#999' }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis dataKey="time" stroke="#4b5563" style={{ fontSize: '14px', fontWeight: 500 }} />
+          <YAxis stroke="#4b5563" label={{ value: 'Radiation (units)', angle: -90, position: 'insideLeft', fill: '#4b5563' }} style={{ fontSize: '14px', fontWeight: 500 }} />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1e293b',
-              border: '1px solid #475569',
+              backgroundColor: '#fff',
+              border: '2px solid #e5e7eb',
               borderRadius: '8px',
+              color: '#1f2937'
             }}
           />
-          <Legend />
+          <Legend wrapperStyle={{ color: '#4b5563', fontWeight: 500 }} />
           <Area 
             type="monotone" 
             dataKey="radiation" 
-            stroke="#ff6600" 
+            stroke="#dc2626" 
             fill="url(#radiationGradient)"
             name="Radiation Level"
+            strokeWidth={2}
           />
           <Line 
             type="monotone" 
             dataKey="threshold" 
-            stroke="#ffaa00" 
+            stroke="#ea580c" 
             strokeDasharray="5 5"
             name="Warning Threshold"
             dot={false}
+            strokeWidth={2}
           />
           <Line 
             type="monotone" 
             dataKey="critical" 
-            stroke="#ff0000" 
+            stroke="#b91c1c" 
             strokeDasharray="5 5"
             name="Critical Threshold"
             dot={false}
+            strokeWidth={2}
           />
         </AreaChart>
       </ResponsiveContainer>
       
       <div className="mt-4 grid grid-cols-3 gap-4 text-center">
         <div>
-          <p className="text-xs text-gray-400">Current</p>
+          <p className="text-xs text-gray-600 font-medium">Current</p>
           <p className={`text-lg font-bold ${
-            currentRadiation > 15 ? 'text-red-400' :
-            currentRadiation > 10 ? 'text-orange-400' : 'text-green-400'
+            currentRadiation > 15 ? 'text-red-600' :
+            currentRadiation > 10 ? 'text-orange-600' : 'text-green-600'
           }`}>
             {currentRadiation.toFixed(2)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Peak (24h)</p>
-          <p className="text-lg font-bold text-purple-400">
+          <p className="text-xs text-gray-600 font-medium">Peak (24h)</p>
+          <p className="text-lg font-bold text-red-600">
             {Math.max(...data.map(d => d.radiation)).toFixed(2)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Average</p>
-          <p className="text-lg font-bold text-blue-400">
+          <p className="text-xs text-gray-600 font-medium">Average</p>
+          <p className="text-lg font-bold text-blue-600">
             {(data.reduce((sum, d) => sum + d.radiation, 0) / data.length).toFixed(2)}
           </p>
         </div>

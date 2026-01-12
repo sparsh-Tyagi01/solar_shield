@@ -128,100 +128,101 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-4xl font-bold text-white mb-2">
-          SolarGuard 3D - Real-Time Monitoring
-        </h1>
-        <p className="text-gray-300">
-          Space Weather Intelligence & Satellite Health Monitoring
-        </p>
-      </motion.div>
-
-      {/* Connection Status Banner */}
-      {!backendConnected && connectionError && (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 bg-red-500/20 border-2 border-red-500 rounded-lg p-4"
+          className="mb-8"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="text-red-500 text-3xl">⚠️</div>
-              <div>
-                <h3 className="text-red-400 font-semibold text-lg">Backend Server Not Connected</h3>
-                <p className="text-red-300 text-sm">{connectionError}</p>
-                <p className="text-red-400 text-xs mt-1">Start with: <code className="bg-black/30 px-2 py-1 rounded">uvicorn backend.main:app --reload</code></p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+            SolarShield - Real-Time Monitoring
+          </h1>
+          <p className="text-slate-600">
+            Space Weather Intelligence & Satellite Health Monitoring
+          </p>
+        </motion.div>
+
+        {/* Connection Status Banner */}
+        {!backendConnected && connectionError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-red-50 border-2 border-red-500 rounded-lg p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="text-red-500 text-3xl">⚠️</div>
+                <div>
+                  <h3 className="text-red-700 font-semibold text-lg">Backend Server Not Connected</h3>
+                  <p className="text-red-600 text-sm">{connectionError}</p>
+                  <p className="text-red-700 text-xs mt-1">Start with: <code className="bg-red-100 px-2 py-1 rounded">uvicorn backend.main:app --reload</code></p>
+                </div>
               </div>
+              <button
+                onClick={fetchCurrentData}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              >
+                Retry
+              </button>
             </div>
-            <button
-              onClick={fetchCurrentData}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
 
-      {backendConnected && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4"
-        >
-          <div className="flex items-center space-x-2 text-green-400 text-sm">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span>Backend Connected</span>
-          </div>
-        </motion.div>
-      )}
+        {backendConnected && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
+          >
+            <div className="flex items-center space-x-2 text-green-600 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Backend Connected</span>
+            </div>
+          </motion.div>
+        )}
 
-      {predictions?.risk_level && (
-        <StormAlert
-          level={predictions.risk_level}
-          probability={predictions.probability}
-          severity={currentData?.kp_index || 3}
-        />
-      )}
+        {predictions?.risk_level && (
+          <StormAlert
+            level={predictions.risk_level}
+            probability={predictions.probability}
+            severity={currentData?.kp_index || 3}
+          />
+        )}
 
-      {/* Fleet Status Summary */}
-      {satellites.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 backdrop-blur-lg rounded-lg p-4 border border-purple-500/30">
-            <h3 className="text-lg font-semibold text-white mb-3">Fleet Status Summary</h3>
+        {/* Fleet Status Summary */}
+        {satellites.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Fleet Status Summary</h3>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400">{fleetStats.total}</div>
-                <div className="text-xs text-gray-400">Total</div>
+                <div className="text-2xl font-bold text-blue-600">{fleetStats.total}</div>
+                <div className="text-xs text-slate-600">Total</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{fleetStats.healthy}</div>
-                <div className="text-xs text-gray-400">Healthy</div>
+                <div className="text-2xl font-bold text-green-600">{fleetStats.healthy}</div>
+                <div className="text-xs text-slate-600">Healthy</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-400">{fleetStats.degraded}</div>
-                <div className="text-xs text-gray-400">Degraded</div>
+                <div className="text-2xl font-bold text-yellow-600">{fleetStats.degraded}</div>
+                <div className="text-xs text-slate-600">Degraded</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-400">{fleetStats.critical}</div>
-                <div className="text-xs text-gray-400">Critical</div>
+                <div className="text-2xl font-bold text-red-600">{fleetStats.critical}</div>
+                <div className="text-xs text-slate-600">Critical</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">{fleetStats.avgHealth}%</div>
-                <div className="text-xs text-gray-400">Avg Health</div>
+                <div className="text-2xl font-bold text-blue-600">{fleetStats.avgHealth}%</div>
+                <div className="text-xs text-slate-600">Avg Health</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-400">{fleetStats.avgDegradation}%</div>
-                <div className="text-xs text-gray-400">Avg Degradation</div>
+                <div className="text-2xl font-bold text-red-600">{fleetStats.avgDegradation}%</div>
+                <div className="text-xs text-slate-600">Avg Degradation</div>
               </div>
             </div>
           </div>
@@ -233,15 +234,15 @@ const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4"
+          className="mb-6 bg-red-50 border border-red-400 rounded-lg p-4"
         >
           <div className="flex items-center space-x-3">
-            <div className="text-red-500 text-2xl">⚠</div>
+            <div className="text-red-600 text-2xl">⚠</div>
             <div>
-              <h3 className="text-red-400 font-semibold">
+              <h3 className="text-red-700 font-semibold">
                 {impactData.affected_systems.length} System(s) at Risk
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-red-600 text-sm">
                 Affected: {impactData.affected_systems.map((s: string) => 
                   s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
                 ).join(', ')}
@@ -255,20 +256,20 @@ const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
             Solar System - Real-Time 3D Visualization
           </h2>
           {!backendConnected ? (
-            <div className="w-full h-[600px] flex items-center justify-center bg-slate-900/50 rounded-lg border-2 border-red-500/30">
+            <div className="w-full h-[600px] flex items-center justify-center bg-gray-100 rounded-lg border-2 border-red-300">
               <div className="text-center">
                 <div className="text-6xl mb-4">🛰️</div>
-                <div className="text-red-400 text-xl font-semibold mb-2">Waiting for Backend Connection</div>
-                <div className="text-gray-400 text-sm">Satellites will appear once connected to the server</div>
+                <div className="text-red-600 text-xl font-semibold mb-2">Waiting for Backend Connection</div>
+                <div className="text-slate-600 text-sm">Satellites will appear once connected to the server</div>
                 <button
                   onClick={fetchCurrentData}
-                  className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   Connect to Backend
                 </button>
@@ -287,7 +288,7 @@ const Dashboard: React.FC = () => {
               />
             </div>
           )}
-          <p className="text-xs text-gray-400 mt-2 text-center">
+          <p className="text-xs text-slate-500 mt-2 text-center">
             {backendConnected 
               ? 'Drag to rotate • Scroll to zoom • 6 satellites tracked • Sun radiation and Earth\'s magnetic field based on real ML model data'
               : 'Connect to backend to see real-time satellite data'}
@@ -300,12 +301,24 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
+          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
             Real-Time Metrics
           </h2>
           <RealTimeMetrics data={currentData} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
+        >
+          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+            Solar Wind Parameters
+          </h2>
+          <SolarWindChart />
         </motion.div>
       </div>
 
@@ -315,7 +328,7 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-2xl font-semibold text-white mb-4">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
             Satellite Fleet Monitor
           </h2>
           <SatelliteMonitor 
@@ -344,18 +357,7 @@ const Dashboard: React.FC = () => {
           <AffectedRegionsMap satellites={satellites} />
         </motion.div>
       )}
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-slate-800/50 backdrop-blur-lg rounded-lg p-6 shadow-2xl border border-purple-500/20"
-      >
-        <h2 className="text-2xl font-semibold text-white mb-4">
-          Solar Wind Parameters (Last 24 Hours)
-        </h2>
-        <SolarWindChart />
-      </motion.div>
+      </div>
     </div>
   );
 };
