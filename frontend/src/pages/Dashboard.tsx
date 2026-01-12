@@ -109,8 +109,11 @@ const Dashboard: React.FC = () => {
   };
 
   const handleSatelliteUpdate = (updatedSatellites: any[]) => {
-    console.log('Dashboard: Received satellite update, count:', updatedSatellites.length);
+    console.log('📡 Dashboard: Received satellite update');
+    console.log('📡 Count received:', updatedSatellites.length);
+    console.log('📡 Satellite names received:', updatedSatellites.map((s: any) => s.name));
     setSatellites(updatedSatellites);
+    console.log('📡 Dashboard state updated with', updatedSatellites.length, 'satellites');
   };
 
   // Fleet status calculations
@@ -175,9 +178,21 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-4"
           >
-            <div className="flex items-center space-x-2 text-green-600 text-sm">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Backend Connected</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-green-600 text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Backend Connected</span>
+              </div>
+              {satellites.length > 0 && (
+                <div className="flex items-center space-x-2 text-blue-600 text-sm">
+                  <span className="font-semibold">
+                    {satellites.filter((s: any) => s.real_data).length}/{satellites.length} satellites with LIVE tracking
+                  </span>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-600 font-semibold">
+                    REAL DATA
+                  </span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

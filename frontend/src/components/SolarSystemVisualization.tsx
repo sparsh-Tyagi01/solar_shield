@@ -291,10 +291,16 @@ const Satellite: React.FC<{
   const [health, setHealth] = useState(satellite.health);
   const [degradation, setDegradation] = useState(satellite.degradation);
 
-  // Convert altitude to scene units (Earth radius = 0.4, Earth = 6371 km)
+  // Convert altitude to scene units with logarithmic scaling for better visibility
   const earthRadius = 0.4;
   const earthRadiusKm = 6371;
-  const orbitRadius = earthRadius + (satellite.altitude / earthRadiusKm) * 0.4;
+  
+  // Use logarithmic scaling to keep high-altitude satellites visible
+  // LEO (400km) → ~0.5 units, MEO (20000km) → ~0.9 units, GEO (36000km) → ~1.1 units
+  const altitudeRatio = satellite.altitude / earthRadiusKm;
+  const logScale = Math.log(1 + altitudeRatio) / Math.log(1 + 35786 / earthRadiusKm); // Normalize to GEO
+  const orbitRadius = earthRadius + logScale * 0.7; // Max 1.1 units from Earth center
+  
   const earthX = 8; // Earth position
 
   useFrame((state) => {
@@ -513,7 +519,9 @@ const SolarSystemScene: React.FC<SolarSystemProps> = (props) => {
   // Notify parent on mount with initial satellites
   useEffect(() => {
     if (props.onSatelliteUpdate && satellites.length > 0) {
-      console.log('SolarSystemVisualization: Sending initial satellites to parent, count:', satellites.length);
+      console.log('🛰️ SolarSystemVisualization: Sending satellites to parent Dashboard');
+      console.log('🛰️ Count being sent:', satellites.length);
+      console.log('🛰️ Satellites being sent:', satellites.map(s => s.name));
       props.onSatelliteUpdate(satellites);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -569,20 +577,28 @@ const SolarSystemScene: React.FC<SolarSystemProps> = (props) => {
       <Moon />
 
       {/* Satellites */}
-      {satellites.map(satellite => (
-        <Satellite
-          key={satellite.id}
-          satellite={satellite}
-          radiationLevel={props.radiationLevel}
-          onUpdate={handleSatelliteUpdate}
-        />
-      ))}
+      {satellites.map(satellite => {
+        console.log('🎨 Rendering satellite in 3D:', satellite.name, satellite.id);
+        return (
+          <Satellite
+            key={satellite.id}
+            satellite={satellite}
+            radiationLevel={props.radiationLevel}
+            onUpdate={handleSatelliteUpdate}
+          />
+        );
+      })}
 
       {/* Orbital paths */}
       {satellites.map(satellite => {
         const earthRadius = 0.4;
         const earthRadiusKm = 6371;
-        const orbitRadius = earthRadius + (satellite.altitude / earthRadiusKm) * 0.4;
+        
+        // Use same logarithmic scaling as satellite positioning
+        const altitudeRatio = satellite.altitude / earthRadiusKm;
+        const logScale = Math.log(1 + altitudeRatio) / Math.log(1 + 35786 / earthRadiusKm);
+        const orbitRadius = earthRadius + logScale * 0.7;
+        
         const points: THREE.Vector3[] = [];
         const earthX = 8;
 

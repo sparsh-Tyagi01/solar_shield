@@ -17,6 +17,7 @@ from backend.ml import (
     ImpactRiskClassifier
 )
 from backend.data import get_fetcher, FeatureEngineer
+from backend.data.satellite_tracker import get_satellite_tracker
 from backend.utils import (
     risk_level,
     categorize_severity,
@@ -61,124 +62,63 @@ severity_model = None
 impact_model = None
 data_fetcher = None
 feature_engineer = None
+satellite_tracker = None
 
-# Global satellite fleet state
+# Global satellite fleet state (now from real tracking)
 satellite_fleet = []
 
 
 def initialize_satellite_fleet():
-    """Initialize satellite fleet with realistic starting conditions based on current space weather"""
-    global satellite_fleet
+    """Initialize satellite fleet with REAL satellite tracking data"""
+    global satellite_fleet, satellite_tracker
     
-    # Get current space weather conditions to determine initial health
+    # Initialize satellite tracker
+    if satellite_tracker is None:
+        satellite_tracker = get_satellite_tracker()
+    
+    # Get current space weather conditions
     try:
-        current_conditions = data_fetcher.fetch_realtime_data() if data_fetcher else None
-        # Calculate base health from recent conditions (90-98% depending on recent activity)
-        if current_conditions:
-            radiation_level = abs(current_conditions.get('bz', 0)) + current_conditions.get('xray_flux', 0) * 1e6
-            base_health = max(85, min(98, 98 - radiation_level * 0.5))
-        else:
-            base_health = 95
+        current_conditions = data_fetcher.fetch_realtime_data() if data_fetcher else {}
+        solar_wind_speed = current_conditions.get('speed', 450)
+        bz = current_conditions.get('bz', 0)
+        proton_flux = current_conditions.get('proton_flux', 1.0)
     except:
-        base_health = 95
+        solar_wind_speed = 450
+        bz = 0
+        proton_flux = 1.0
     
-    satellite_fleet = [
-        {
-            'id': 'sat-1',
-            'name': 'GPS-IIF-12',
-            'type': 'GPS',
-            'health': base_health + np.random.uniform(-3, 2),
-            'degradation': np.random.uniform(0, 5),
-            'altitude': 20200,
-            'orbitalPeriod': 40,
-            'inclination': 55,  # degrees
-            'phase': 0
-        },
-        {
-            'id': 'sat-2',
-            'name': 'TDRS-13',
-            'type': 'Communication',
-            'health': base_health + np.random.uniform(-3, 2),
-            'degradation': np.random.uniform(0, 5),
-            'altitude': 35786,
-            'orbitalPeriod': 60,
-            'inclination': 15,
-            'phase': 60
-        },
-        {
-            'id': 'sat-3',
-            'name': 'GOES-18',
-            'type': 'Weather',
-            'health': base_health + np.random.uniform(-3, 2),
-            'degradation': np.random.uniform(0, 5),
-            'altitude': 35786,
-            'orbitalPeriod': 60,
-            'inclination': 0,
-            'phase': 180
-        },
-        {
-            'id': 'sat-4',
-            'name': 'ISS',
-            'type': 'ISS',
-            'health': base_health + np.random.uniform(-5, 0),  # ISS more vulnerable
-            'degradation': np.random.uniform(2, 8),
-            'altitude': 408,
-            'orbitalPeriod': 30,
-            'inclination': 51.6,
-            'phase': 90
-        },
-        {
-            'id': 'sat-5',
-            'name': 'GPS-IIF-07',
-            'type': 'GPS',
-            'health': base_health + np.random.uniform(-3, 2),
-            'degradation': np.random.uniform(0, 5),
-            'altitude': 20200,
-            'orbitalPeriod': 40,
-            'inclination': 55,
-            'phase': 180
-        },
-        {
-            'id': 'sat-6',
-            'name': 'Hubble Space Telescope',
-            'type': 'Research',
-            'health': base_health + np.random.uniform(-4, 1),
-            'degradation': np.random.uniform(5, 12),  # Older satellite
-            'altitude': 547,
-            'orbitalPeriod': 32,
-            'inclination': 28.5,
-            'phase': 270
-        }
-    ]
+    # Get real satellite fleet status
+    satellite_fleet = satellite_tracker.get_fleet_status(
+        solar_wind_speed=solar_wind_speed,
+        bz=bz,
+        proton_flux=proton_flux
+    )
     
-    logger.info(f"Satellite fleet initialized with {len(satellite_fleet)} satellites, avg health: {np.mean([s['health'] for s in satellite_fleet]):.1f}%")
+    real_count = sum(1 for sat in satellite_fleet if sat.get('real_data', False))
+    logger.info(f"Satellite fleet initialized: {len(satellite_fleet)} satellites "
+                f"({real_count} with real data, {len(satellite_fleet) - real_count} simulated)")
+    logger.info(f"Average health: {np.mean([s['health'] for s in satellite_fleet]):.1f}%")
+    
     return satellite_fleet
 
 
-def update_satellite_health(radiation_level: float, solar_wind_speed: float):
-    """Update satellite health based on current space weather"""
-    global satellite_fleet
+def update_satellite_health(radiation_level: float, solar_wind_speed: float, bz: float = 0, proton_flux: float = 1.0):
+    """Update satellite health based on current space weather using real tracking"""
+    global satellite_fleet, satellite_tracker
+    
+    if satellite_tracker is None:
+        satellite_tracker = get_satellite_tracker()
     
     if not satellite_fleet:
         initialize_satellite_fleet()
-        return
+        return satellite_fleet
     
-    for satellite in satellite_fleet:
-        # Calculate degradation based on space weather and satellite type
-        vulnerability = {
-            'ISS': 2.0,
-            'Research': 1.5,
-            'GPS': 1.0,
-            'Communication': 1.2,
-            'Weather': 0.9
-        }.get(satellite['type'], 1.0)
-        
-        # Degradation increases with radiation and solar wind
-        degradation_rate = (radiation_level * 0.02 + solar_wind_speed / 500) * vulnerability
-        satellite['degradation'] = min(100, satellite['degradation'] + degradation_rate)
-        
-        # Health decreases as degradation increases
-        satellite['health'] = max(0, 100 - satellite['degradation'] * 0.8)
+    # Get updated fleet status with current conditions
+    satellite_fleet = satellite_tracker.get_fleet_status(
+        solar_wind_speed=solar_wind_speed,
+        bz=bz,
+        proton_flux=proton_flux
+    )
     
     return satellite_fleet
 
@@ -248,11 +188,15 @@ class ImpactPrediction(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Load models on startup"""
-    global occurrence_model, severity_model, impact_model, data_fetcher, feature_engineer
+    global occurrence_model, severity_model, impact_model, data_fetcher, feature_engineer, satellite_tracker
     
     logger.info("Starting SolarGuard 3D API...")
     
     try:
+        # Initialize satellite tracker
+        logger.info("Initializing real-time satellite tracker...")
+        satellite_tracker = get_satellite_tracker()
+        
         # Initialize data fetcher and feature engineer
         data_fetcher = get_fetcher()
         feature_engineer = FeatureEngineer()
@@ -269,7 +213,7 @@ async def startup_event():
         else:
             logger.warning("⚠ Storm occurrence model not found. Train models first.")
             
-        # Initialize satellite fleet
+        # Initialize satellite fleet with real data
         initialize_satellite_fleet()
         
         if STORM_SEVERITY_MODEL_PATH.exists():
@@ -331,6 +275,8 @@ async def get_satellite_fleet():
     
     if not satellite_fleet:
         initialize_satellite_fleet()
+    
+    logger.info(f"API returning {len(satellite_fleet)} satellites: {[s['name'] for s in satellite_fleet]}")
     
     return {
         "satellites": satellite_fleet,
@@ -606,9 +552,14 @@ async def realtime_stream(websocket: WebSocket):
                 # Fetch latest data
                 realtime_data = data_fetcher.fetch_realtime_data()
                 
-                # Update satellite health based on current conditions
+                # Update satellite health based on current conditions with real tracking
                 radiation_level = abs(realtime_data.get('bz', 0)) + realtime_data.get('xray_flux', 0) * 1e6
-                update_satellite_health(radiation_level, realtime_data.get('speed', 400))
+                update_satellite_health(
+                    radiation_level=radiation_level,
+                    solar_wind_speed=realtime_data.get('speed', 400),
+                    bz=realtime_data.get('bz', 0),
+                    proton_flux=realtime_data.get('proton_flux', 1.0)
+                )
                 
                 # Make predictions
                 data = SpaceWeatherData(**realtime_data)

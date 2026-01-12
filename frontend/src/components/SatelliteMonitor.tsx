@@ -90,7 +90,14 @@ const SatelliteMonitor: React.FC<SatelliteMonitorProps> = ({ satellites, radiati
               <div className="flex items-center space-x-2">
                 {getStatusIcon(satellite.health)}
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-800">{satellite.name}</h4>
+                  <div className="flex items-center space-x-2">
+                    <h4 className="text-sm font-semibold text-gray-800">{satellite.name}</h4>
+                    {(satellite as any).real_data && (
+                      <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-600 font-semibold">
+                        LIVE
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-600">{satellite.type}</p>
                 </div>
               </div>
