@@ -37,19 +37,19 @@ data/raw/*
 data/processed/*
 !data/.gitkeep
 
-# Models
-models/*.pkl
-models/*.h5
-models/*.pt
-models/*.joblib
-!models/.gitkeep
+# # Models
+# models/*.pkl
+# models/*.h5
+# models/*.pt
+# models/*.joblib
+# !models/.gitkeep
 
 # Logs
 logs/
 *.log
 
-# Environment
-.env
+Environment
+
 
 # macOS
 .DS_Store
@@ -57,3 +57,5 @@ logs/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
+
+.env
