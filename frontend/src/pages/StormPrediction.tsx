@@ -55,7 +55,7 @@ const StormPrediction: React.FC = () => {
         >
           <h3 className="text-blue-700 text-lg mb-2 font-semibold">Storm Probability</h3>
           <div className="text-4xl font-bold text-blue-600">
-            {((predictions?.storm_probability || 0) * 100).toFixed(1)}%
+            {((predictions?.probability || predictions?.storm_probability || 0) * 100).toFixed(1)}%
           </div>
         </motion.div>
 

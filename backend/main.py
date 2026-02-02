@@ -699,12 +699,14 @@ async def get_storm_prediction():
             severity_data = severity_pred.dict()
         
         return {
-            "storm_probability": storm_data['probability'],
+            "probability": storm_data['probability'],
+            "storm_probability": storm_data['probability'],  # Keep for backwards compatibility
             "severity": severity_data['severity_score'],
             "alert_level": alert_level,
             "will_storm_occur": storm_data['will_storm_occur'],
             "category": severity_data['category'],
             "risk_level": storm_data['risk_level'],
+            "confidence": storm_data.get('confidence', 0.85),
             "timestamp": storm_data.get('timestamp', format_timestamp(datetime.utcnow()))
         }
         
@@ -735,35 +737,37 @@ async def get_impact_prediction():
             # Return mock impact data if model not available
             logger.warning("Impact model not available, returning mock data")
             
-            # Calculate risk based on severity
+            # Calculate risk based on severity - use realistic thresholds
             severity_pred = await predict_severity(data)
             severity = severity_pred['severity_score'] if isinstance(severity_pred, dict) else severity_pred.severity_score
             
+            # Only mark as affected if severity is actually significant (>6 for satellites, >7 for others)
+            # Normal conditions (severity < 5) should show NO affected systems
             risk_factor = severity / 10.0
             
             return {
                 "satellites": {
                     "risk": min(risk_factor * 0.8, 1.0),
-                    "affected": risk_factor > 0.5
+                    "affected": severity > 6.0  # Only affected at moderate-high severity
                 },
                 "gps": {
                     "risk": min(risk_factor * 0.7, 1.0),
-                    "affected": risk_factor > 0.6
+                    "affected": severity > 7.0  # Higher threshold for GPS
                 },
                 "communication": {
                     "risk": min(risk_factor * 0.6, 1.0),
-                    "affected": risk_factor > 0.7
+                    "affected": severity > 7.5  # Higher threshold
                 },
                 "power_grid": {
                     "risk": min(risk_factor * 0.9, 1.0),
-                    "affected": risk_factor > 0.8
+                    "affected": severity > 8.0  # Only affected at severe storms
                 },
                 "affected_systems": [
                     cat for cat in ["satellites", "gps", "communication", "power_grid"]
-                    if (cat == "satellites" and risk_factor > 0.5) or
-                       (cat == "gps" and risk_factor > 0.6) or
-                       (cat == "communication" and risk_factor > 0.7) or
-                       (cat == "power_grid" and risk_factor > 0.8)
+                    if (cat == "satellites" and severity > 6.0) or
+                       (cat == "gps" and severity > 7.0) or
+                       (cat == "communication" and severity > 7.5) or
+                       (cat == "power_grid" and severity > 8.0)
                 ],
                 "timestamp": format_timestamp(datetime.utcnow())
             }

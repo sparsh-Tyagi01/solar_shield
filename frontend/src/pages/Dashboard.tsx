@@ -197,11 +197,11 @@ const Dashboard: React.FC = () => {
           </motion.div>
         )}
 
-        {predictions?.risk_level && (
+        {predictions && predictions.risk_level && (
           <StormAlert
             level={predictions.risk_level}
-            probability={predictions.probability}
-            severity={currentData?.kp_index || 3}
+            probability={predictions.probability || predictions.storm_probability || 0}
+            severity={predictions.severity || currentData?.kp_index || 3}
           />
         )}
 
@@ -244,23 +244,31 @@ const Dashboard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Impact Systems Alert */}
-      {impactData && impactData.affected_systems && impactData.affected_systems.length > 0 && (
+      {/* Impact Systems Alert - Only show when there's actual risk */}
+      {impactData && 
+       impactData.affected_systems && 
+       Array.isArray(impactData.affected_systems) && 
+       impactData.affected_systems.length > 0 && 
+       (predictions?.severity > 6 || predictions?.probability > 0.6) && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 bg-red-50 border border-red-400 rounded-lg p-4"
+          className="mb-6 bg-red-50 border-2 border-red-500 rounded-lg p-4 shadow-lg"
         >
           <div className="flex items-center space-x-3">
-            <div className="text-red-600 text-2xl">⚠</div>
+            <div className="text-red-600 text-3xl">⚠️</div>
             <div>
-              <h3 className="text-red-700 font-semibold">
+              <h3 className="text-red-700 font-bold text-lg">
                 {impactData.affected_systems.length} System(s) at Risk
               </h3>
               <p className="text-red-600 text-sm">
                 Affected: {impactData.affected_systems.map((s: string) => 
                   s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
                 ).join(', ')}
+              </p>
+              <p className="text-red-500 text-xs mt-1">
+                Storm Severity: {predictions?.severity?.toFixed(1) || 'N/A'} • 
+                Probability: {((predictions?.probability || 0) * 100).toFixed(0)}%
               </p>
             </div>
           </div>

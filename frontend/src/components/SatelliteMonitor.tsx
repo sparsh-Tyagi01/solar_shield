@@ -42,8 +42,49 @@ const SatelliteMonitor: React.FC<SatelliteMonitorProps> = ({ satellites, radiati
                          radiationLevel > 10 ? 'text-orange-600' :
                          radiationLevel > 5 ? 'text-yellow-700' : 'text-green-600';
 
+  const alertsActive = satellites.filter(s => s.health < 70).length;
+  const criticalAlerts = satellites.filter(s => s.health < 50).length;
+
   return (
     <div className="space-y-4">
+      {/* Critical Alert Banner */}
+      {criticalAlerts > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-50 border-2 border-red-600 rounded-lg p-4"
+        >
+          <div className="flex items-center space-x-3">
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+            <div>
+              <h4 className="text-red-700 font-bold">CRITICAL SATELLITE ALERT</h4>
+              <p className="text-red-600 text-sm">
+                {criticalAlerts} satellite{criticalAlerts > 1 ? 's' : ''} in critical condition. Immediate action required.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Warning Alert Banner */}
+      {alertsActive > 0 && criticalAlerts === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-yellow-50 border-2 border-yellow-600 rounded-lg p-4"
+        >
+          <div className="flex items-center space-x-3">
+            <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
+            <div>
+              <h4 className="text-yellow-700 font-bold">SATELLITE WARNING</h4>
+              <p className="text-yellow-700 text-sm">
+                {alertsActive} satellite{alertsActive > 1 ? 's' : ''} showing degraded performance. Monitor closely.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+      
       {/* Radiation Level Indicator */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
