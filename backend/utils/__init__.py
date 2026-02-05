@@ -16,6 +16,9 @@ from .helpers import (
     parse_timestamp
 )
 from .logger import get_logger
+from .confidence_calculator import get_confidence_calculator, ConfidenceCalculator
+from .economy_loss import get_economy_calculator, EconomyLossCalculator
+from .model_improver import get_model_improver, ModelImprover
 
 __all__ = [
     'risk_level',
@@ -30,5 +33,11 @@ __all__ = [
     'get_time_to_impact',
     'format_timestamp',
     'parse_timestamp',
-    'get_logger'
+    'get_logger',
+    'get_confidence_calculator',
+    'ConfidenceCalculator',
+    'get_economy_calculator',
+    'EconomyLossCalculator',
+    'get_model_improver',
+    'ModelImprover'
 ]

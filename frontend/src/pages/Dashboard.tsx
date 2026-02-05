@@ -7,6 +7,7 @@ import SolarWindChart from '../components/SolarWindChart';
 import SatelliteMonitor from '../components/SatelliteMonitor';
 import RadiationChart from '../components/RadiationChart';
 import AffectedRegionsMap from '../components/AffectedRegionsMap';
+import ModelImprovementStatus from '../components/ModelImprovementStatus';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
 
@@ -202,8 +203,12 @@ const Dashboard: React.FC = () => {
             level={predictions.risk_level}
             probability={predictions.probability || predictions.storm_probability || 0}
             severity={predictions.severity || currentData?.kp_index || 3}
+            confidence={predictions.confidence || 85}
           />
         )}
+
+        {/* Model Improvement Status - NEW FEATURE */}
+        <ModelImprovementStatus />
 
         {/* Fleet Status Summary */}
         {satellites.length > 0 && (

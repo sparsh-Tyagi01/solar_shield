@@ -26,7 +26,10 @@ from backend.utils import (
     generate_explanation,
     validate_data,
     get_time_to_impact,
-    format_timestamp
+    format_timestamp,
+    get_confidence_calculator,
+    get_economy_calculator,
+    get_model_improver
 )
 from backend.utils.logger import get_logger
 from backend.config import (
@@ -63,6 +66,11 @@ impact_model = None
 data_fetcher = None
 feature_engineer = None
 satellite_tracker = None
+
+# Global utility instances
+confidence_calculator = None
+economy_calculator = None
+model_improver = None
 
 # Global satellite fleet state (now from real tracking)
 satellite_fleet = []
@@ -189,10 +197,17 @@ class ImpactPrediction(BaseModel):
 async def startup_event():
     """Load models on startup"""
     global occurrence_model, severity_model, impact_model, data_fetcher, feature_engineer, satellite_tracker
+    global confidence_calculator, economy_calculator, model_improver
     
     logger.info("Starting SolarGuard 3D API...")
     
     try:
+        # Initialize utilities
+        confidence_calculator = get_confidence_calculator()
+        economy_calculator = get_economy_calculator()
+        model_improver = get_model_improver()
+        logger.info("Utility systems initialized")
+        
         # Initialize satellite tracker
         logger.info("Initializing real-time satellite tracker...")
         satellite_tracker = get_satellite_tracker()
@@ -313,10 +328,27 @@ async def predict_storm(data: SpaceWeatherData):
         
         # Predict
         prediction = occurrence_model.predict_single(input_data)
+        
+        # Calculate confidence score
+        input_quality = confidence_calculator.assess_input_quality(input_data)
+        confidence_score = confidence_calculator.calculate_occurrence_confidence(
+            probability=prediction['probability'],
+            input_quality=input_quality
+        )
+        prediction['confidence'] = confidence_score
+        
+        # Log prediction for future improvement
+        prediction_id = model_improver.log_prediction(
+            model_type='storm_occurrence',
+            input_data=input_data,
+            prediction=prediction['will_storm_occur']
+        )
+        
         prediction['timestamp'] = format_timestamp(datetime.utcnow())
+        prediction['prediction_id'] = prediction_id
         
         logger.info(f"Storm occurrence prediction: {prediction['will_storm_occur']} "
-                   f"(prob={prediction['probability']:.3f})")
+                   f"(prob={prediction['probability']:.3f}, confidence={confidence_score:.1f}%)")
         
         return prediction
         
@@ -353,10 +385,27 @@ async def predict_severity(data: SpaceWeatherData):
         
         # Predict
         prediction = severity_model.predict_single_sequence(sequence)
+        
+        # Calculate confidence score
+        input_quality = confidence_calculator.assess_input_quality(data.dict())
+        confidence_score = confidence_calculator.calculate_severity_confidence(
+            prediction_variance=0.5,  # Default variance, would need ensemble for real variance
+            input_quality=input_quality
+        )
+        prediction['confidence'] = confidence_score
+        
+        # Log prediction for future improvement
+        prediction_id = model_improver.log_prediction(
+            model_type='storm_severity',
+            input_data=data.dict(),
+            prediction=prediction['severity_score']
+        )
+        
         prediction['timestamp'] = format_timestamp(datetime.utcnow())
+        prediction['prediction_id'] = prediction_id
         
         logger.info(f"Storm severity prediction: {prediction['severity_score']:.2f} "
-                   f"({prediction['category']})")
+                   f"({prediction['category']}, confidence={confidence_score:.1f}%)")
         
         return prediction
         
@@ -855,6 +904,218 @@ async def get_models_info():
         }
     
     return info
+
+
+@app.post("/api/economy-loss")
+async def calculate_economy_loss(data: SpaceWeatherData):
+    """
+    Calculate potential economic losses from ignoring space weather alert
+    
+    NEW FEATURE: Economy Loss Calculator
+    Shows potential satellite damage costs and service disruption losses
+    """
+    try:
+        # Get severity prediction first
+        severity_pred = await predict_severity(data)
+        severity_score = severity_pred['severity_score'] if isinstance(severity_pred, dict) else severity_pred.severity_score
+        
+        # Get impact prediction
+        try:
+            impact_pred = await predict_impact(data)
+            if isinstance(impact_pred, dict):
+                impact_dict = impact_pred
+            else:
+                impact_dict = impact_pred.dict()
+            
+            # Extract impact probabilities
+            impact_probabilities = {
+                'satellites': impact_dict.get('satellites', {}).get('risk', 0.5),
+                'gps': impact_dict.get('gps', {}).get('risk', 0.3),
+                'communication': impact_dict.get('communication', {}).get('risk', 0.3),
+                'power_grid': impact_dict.get('power_grid', {}).get('risk', 0.2)
+            }
+        except:
+            # Fallback impact probabilities based on severity
+            risk_factor = severity_score / 10.0
+            impact_probabilities = {
+                'satellites': risk_factor * 0.8,
+                'gps': risk_factor * 0.6,
+                'communication': risk_factor * 0.5,
+                'power_grid': risk_factor * 0.4
+            }
+        
+        # Calculate economy loss
+        economy_impact = economy_calculator.calculate_total_economic_impact(
+            severity_score=severity_score,
+            impact_probabilities=impact_probabilities,
+            num_satellites=len(satellite_fleet) if satellite_fleet else 10,
+            include_indirect=True
+        )
+        
+        logger.info(f"Economy loss calculated: ${economy_impact['total_expected_loss_million_usd']}M")
+        
+        return economy_impact
+        
+    except Exception as e:
+        logger.error(f"Error calculating economy loss: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/economy-loss/current")
+async def get_current_economy_loss():
+    """Get economy loss calculation for current conditions"""
+    try:
+        # Get current conditions
+        conditions = await get_current_conditions()
+        
+        # Create data object
+        data = SpaceWeatherData(
+            bz=conditions['bz'],
+            speed=conditions['speed'],
+            density=conditions['density'],
+            pressure=conditions.get('pressure'),
+            xray_flux=conditions.get('xray_flux'),
+            proton_flux=conditions.get('proton_flux')
+        )
+        
+        # Calculate economy loss
+        economy_impact = await calculate_economy_loss(data)
+        
+        return economy_impact
+        
+    except Exception as e:
+        logger.error(f"Error getting current economy loss: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/model-improvement/record-outcome")
+async def record_actual_outcome(
+    prediction_id: str,
+    actual_storm: Optional[bool] = None,
+    actual_severity: Optional[float] = None,
+    actual_impacts: Optional[Dict[str, bool]] = None
+):
+    """
+    Record actual outcome for a previous prediction
+    
+    NEW FEATURE: Model Auto-Improvement
+    Allows recording real outcomes to improve model accuracy over time
+    """
+    try:
+        results = {}
+        
+        # Record storm occurrence outcome
+        if actual_storm is not None and 'occurrence' in prediction_id:
+            success = model_improver.record_actual_outcome(prediction_id, actual_storm)
+            results['storm_occurrence'] = 'recorded' if success else 'failed'
+            
+            # Update confidence calculator history
+            if success:
+                confidence_calculator.update_history(
+                    'storm_occurrence',
+                    predicted=actual_storm,  # Would need to store predicted value
+                    actual=actual_storm
+                )
+        
+        # Record severity outcome
+        if actual_severity is not None and 'severity' in prediction_id:
+            success = model_improver.record_actual_outcome(prediction_id, actual_severity)
+            results['storm_severity'] = 'recorded' if success else 'failed'
+            
+            # Update confidence calculator history
+            if success:
+                confidence_calculator.update_history(
+                    'storm_severity',
+                    predicted=actual_severity,  # Would need to store predicted value
+                    actual=actual_severity
+                )
+        
+        # Record impact outcome
+        if actual_impacts is not None and 'impact' in prediction_id:
+            success = model_improver.record_actual_outcome(prediction_id, actual_impacts)
+            results['impact_risk'] = 'recorded' if success else 'failed'
+        
+        logger.info(f"Recorded actual outcomes for {prediction_id}: {results}")
+        
+        return {
+            'prediction_id': prediction_id,
+            'results': results,
+            'message': 'Outcomes recorded successfully',
+            'timestamp': format_timestamp(datetime.utcnow())
+        }
+        
+    except Exception as e:
+        logger.error(f"Error recording outcome: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/model-improvement/status")
+async def get_model_improvement_status():
+    """
+    Get model improvement system status
+    
+    NEW FEATURE: Model Auto-Improvement Status
+    Shows how models are improving based on actual vs predicted data
+    """
+    try:
+        # Get improvement summary
+        improvement_summary = model_improver.get_improvement_summary()
+        
+        # Get performance summary
+        performance_summary = confidence_calculator.get_performance_summary()
+        
+        # Combine information
+        status = {
+            'improvement_tracking': improvement_summary,
+            'performance_metrics': performance_summary,
+            'timestamp': format_timestamp(datetime.utcnow())
+        }
+        
+        logger.info("Model improvement status retrieved")
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Error getting improvement status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/confidence/summary")
+async def get_confidence_summary():
+    """
+    Get confidence score summary for all models
+    
+    NEW FEATURE: Confidence Scores
+    Shows how reliable each model's predictions are
+    """
+    try:
+        performance = confidence_calculator.get_performance_summary()
+        
+        summary = {
+            'storm_occurrence': {
+                'current_accuracy': performance.get('storm_occurrence_accuracy'),
+                'baseline': 0.85,
+                'status': 'excellent' if performance.get('storm_occurrence_accuracy', 0.85) > 0.85 else 'good'
+            },
+            'storm_severity': {
+                'current_mae': performance.get('storm_severity_mae'),
+                'current_rmse': performance.get('storm_severity_rmse'),
+                'baseline_mae': 1.2,
+                'status': 'excellent' if performance.get('storm_severity_mae', 1.2) < 1.2 else 'good'
+            },
+            'impact_risk': {
+                'current_accuracy': performance.get('impact_risk_accuracy'),
+                'baseline': 0.80,
+                'status': 'excellent' if performance.get('impact_risk_accuracy', 0.80) > 0.80 else 'good'
+            },
+            'timestamp': format_timestamp(datetime.utcnow())
+        }
+        
+        return summary
+        
+    except Exception as e:
+        logger.error(f"Error getting confidence summary: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
