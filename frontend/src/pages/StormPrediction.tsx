@@ -94,7 +94,7 @@ const StormPrediction: React.FC = () => {
           Prediction Details
         </h2>
         <div className="text-gray-700 space-y-2">
-          <p><span className="font-semibold text-gray-800">Model Confidence:</span> {((predictions?.confidence || 0.85) * 100).toFixed(1)}%</p>
+          <p><span className="font-semibold text-gray-800">Model Confidence:</span> {((predictions?.confidence || 0.85)).toFixed(1)}%</p>
           <p><span className="font-semibold text-gray-800">Forecast Window:</span> Next 6-24 hours</p>
           <p><span className="font-semibold text-gray-800">Last Updated:</span> {new Date().toLocaleString()}</p>
         </div>
