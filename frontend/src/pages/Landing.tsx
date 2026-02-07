@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { 
   Sun, 
   Satellite, 
@@ -12,7 +13,8 @@ import {
   Database,
   MapPin,
   Play,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
 
 const Landing: React.FC = () => {
@@ -27,7 +29,7 @@ const Landing: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Section with Video */}
       <section className="relative h-screen overflow-hidden">
         {/* Background Video */}
@@ -38,51 +40,113 @@ const Landing: React.FC = () => {
             loop
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover opacity-40"
           >
             <source src="/10925862-hd_1920_1080_30fps.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/70"></div>
         </div>
 
         {/* Content */}
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <div className="max-w-6xl mx-auto text-center px-6">
-            <div className="flex justify-center mb-6">
-              <Shield className="w-20 h-20 text-white drop-shadow-lg" />
-            </div>
-            <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
-              SolarShield
-            </h1>
-            <p className="text-xl md:text-2xl text-white mb-12 max-w-3xl mx-auto drop-shadow-lg">
-              Advanced Solar Storm Prediction and Satellite Protection System
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link 
-                to="/dashboard" 
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg shadow-lg"
-              >
-                Launch Dashboard
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex justify-center mb-8"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                <Shield className="relative w-24 h-24 text-cyan-400 drop-shadow-2xl" />
+              </div>
+            </motion.div>
+            
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-7xl md:text-8xl font-display font-bold mb-6"
+            >
+              <span className="text-gradient">Solar</span>
+              <span className="text-white">Shield</span>
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-xl md:text-2xl text-slate-200 mb-12 max-w-3xl mx-auto font-body"
+            >
+              Advanced Space Weather Intelligence & Satellite Protection with AI-Powered Predictions
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap justify-center gap-4"
+            >
+              <Link to="/dashboard">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-display font-semibold text-lg shadow-2xl hover:shadow-cyan-500/50 transition-all"
+                >
+                  Launch Dashboard
+                </motion.button>
               </Link>
-              <a 
-                href="#features" 
-                className="px-8 py-4 bg-white text-slate-900 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg"
-              >
-                Learn More
+              
+              <Link to="/time-machine">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 glass-effect text-white rounded-xl font-display font-semibold text-lg shadow-2xl border border-cyan-400/50 hover:border-cyan-400 transition-all flex items-center space-x-2 animate-pulse-slow"
+                >
+                  <Clock className="w-5 h-5" />
+                  <span>Time Machine</span>
+                </motion.button>
+              </Link>
+              
+              <a href="#features">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-display font-semibold text-lg shadow-2xl border border-white/20 hover:bg-white/20 transition-all"
+                >
+                  Learn More
+                </motion.button>
               </a>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="px-6 py-20 bg-gray-50">
+      <section id="features" className="px-6 py-20 bg-gradient-to-b from-slate-900 to-slate-800">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-slate-900 text-center mb-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-5xl font-display font-bold text-gradient text-center mb-4"
+          >
             Key Features
-          </h2>
-          <p className="text-center text-gray-600 mb-16 text-lg">Powered by cutting-edge technology and real-time data</p>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center text-slate-300 mb-16 text-lg font-body"
+          >
+            Powered by cutting-edge AI and real-time space weather data
+          </motion.p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<Clock className="w-8 h-8" />}
+              title="Solar Storm Time Machine"
+              description="Replay historic solar storms and see what would happen if they hit Earth TODAY with our current satellite infrastructure."
+            />
             <FeatureCard 
               icon={<Activity className="w-8 h-8" />}
               title="Real-Time Monitoring"
@@ -107,11 +171,6 @@ const Landing: React.FC = () => {
               icon={<Globe className="w-8 h-8" />}
               title="3D Earth Visualization"
               description="Interactive 3D globe showing affected regions, radiation levels, and real-time coverage areas."
-            />
-            <FeatureCard 
-              icon={<Sun className="w-8 h-8" />}
-              title="Solar System 3D View"
-              description="Immersive 3D visualization of the solar system with real-time solar wind propagation."
             />
           </div>
         </div>
@@ -220,7 +279,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20 bg-blue-600">
+      <section className="px-6 py-20 bg-[#081a44]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
             Ready to Monitor Solar Activity?
@@ -230,7 +289,7 @@ const Landing: React.FC = () => {
           </p>
           <Link 
             to="/dashboard" 
-            className="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg"
+            className="inline-block px-8 py-4 bg-white text-blue-900 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg"
           >
             Launch Dashboard
           </Link>
@@ -256,15 +315,37 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  highlight?: boolean;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, highlight = false }) => {
   return (
-    <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="text-blue-600 mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ scale: 1.05, y: -5 }}
+      className={`
+        glass-effect rounded-xl p-6 hover-lift cursor-pointer
+        ${highlight 
+          ? 'bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-400 animate-pulse-slow' 
+          : 'bg-gradient-to-br from-slate-800/50 to-slate-700/50 border border-slate-600'
+        }
+      `}
+    >
+      <div className={`mb-4 ${highlight ? 'text-cyan-400' : 'text-blue-400'}`}>
+        {icon}
+      </div>
+      <h3 className="text-xl font-display font-bold text-white mb-3">{title}</h3>
+      <p className="text-slate-300 font-body">{description}</p>
+      {highlight && (
+        <div className="mt-4">
+          <span className="inline-block px-3 py-1 bg-cyan-400 text-slate-900 rounded-full text-xs font-bold">
+            NEW FEATURE
+          </span>
+        </div>
+      )}
+    </motion.div>
   );
 };
 

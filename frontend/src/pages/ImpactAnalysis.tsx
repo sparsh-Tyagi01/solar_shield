@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip 
 } from 'recharts';
+import { Shield, AlertTriangle, Satellite, Radio, Zap } from 'lucide-react';
 
 interface ImpactCategory {
   risk: number;
@@ -39,11 +40,9 @@ const ImpactAnalysis: React.FC = () => {
 
   const fetchImpactData = async () => {
     try {
-      // Use current conditions endpoint to get latest data for prediction
       const conditionsResponse = await axios.get('http://localhost:8000/api/current-conditions');
       const conditions = conditionsResponse.data;
       
-      // Make prediction with current conditions
       const response = await axios.post('http://localhost:8000/predict/impact', {
         bz: conditions.bz,
         speed: conditions.speed,
@@ -70,10 +69,11 @@ const ImpactAnalysis: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-800 text-2xl mb-2">Loading impact analysis...</div>
-          <div className="text-gray-600 text-sm">Connecting to backend...</div>
+          <div className="animate-spin w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="data-value text-2xl mb-2">Analyzing Infrastructure Impact</div>
+          <div className="text-gray-400 text-sm font-mono uppercase tracking-wider">Connecting to Mission Control...</div>
         </div>
       </div>
     );
@@ -81,14 +81,15 @@ const ImpactAnalysis: React.FC = () => {
 
   if (error && !impactData) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="text-red-600 text-2xl mb-4">⚠️ Backend Not Connected</div>
-          <div className="text-gray-600 text-sm mb-4">{error}</div>
-          <div className="text-gray-500 text-xs">Start the backend with: uvicorn backend.main:app --reload</div>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center mission-panel p-8 rounded-2xl max-w-md">
+          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4 animate-pulse" />
+          <div className="text-red-400 text-2xl font-display font-bold mb-4">⚠️ Backend Not Connected</div>
+          <div className="text-gray-400 text-sm mb-4 font-mono">{error}</div>
+          <div className="text-gray-500 text-xs mb-6 font-mono">Start the backend with: uvicorn backend.main:app --reload</div>
           <button 
             onClick={fetchImpactData}
-            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-display font-bold uppercase tracking-wider text-sm hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
           >
             Retry Connection
           </button>
@@ -125,201 +126,239 @@ const ImpactAnalysis: React.FC = () => {
   ];
 
   const getStatusColor = (status: string, affected: boolean) => {
-    // If affected, always show warning colors regardless of status
-    if (affected) {
-      return 'text-red-600';
-    }
+    if (affected) return 'text-red-400';
     switch (status) {
-      case 'CRITICAL': return 'text-red-600';
-      case 'HIGH': return 'text-orange-600';
-      case 'MODERATE': return 'text-yellow-700';
-      case 'LOW': return 'text-green-600';
-      case 'MINIMAL': return 'text-blue-600';
-      default: return 'text-gray-600';
+      case 'CRITICAL': return 'text-red-400';
+      case 'HIGH': return 'text-orange-400';
+      case 'MODERATE': return 'text-amber-400';
+      case 'LOW': return 'text-green-400';
+      case 'MINIMAL': return 'text-cyan-400';
+      default: return 'text-gray-400';
     }
   };
 
   const getStatusBadgeColor = (status: string, affected: boolean) => {
-    // If affected, always show danger colors
-    if (affected) {
-      return 'bg-red-100 border-red-600 text-red-700';
-    }
+    if (affected) return 'bg-red-500/20 border-red-500/50 text-red-400';
     switch (status) {
-      case 'CRITICAL': return 'bg-red-100 border-red-600 text-red-700';
-      case 'HIGH': return 'bg-orange-100 border-orange-600 text-orange-700';
-      case 'MODERATE': return 'bg-yellow-100 border-yellow-600 text-yellow-800';
-      case 'LOW': return 'bg-green-100 border-green-600 text-green-700';
-      case 'MINIMAL': return 'bg-blue-100 border-blue-600 text-blue-700';
-      default: return 'bg-gray-100 border-gray-600 text-gray-700';
+      case 'CRITICAL': return 'bg-red-500/20 border-red-500/50 text-red-400';
+      case 'HIGH': return 'bg-orange-500/20 border-orange-500/50 text-orange-400';
+      case 'MODERATE': return 'bg-amber-500/20 border-amber-500/50 text-amber-400';
+      case 'LOW': return 'bg-green-500/20 border-green-500/50 text-green-400';
+      case 'MINIMAL': return 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400';
+      default: return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
     }
   };
 
   const affectedCount = impactData?.affected_systems?.length || 0;
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Satellites': return <Satellite className="w-5 h-5" />;
+      case 'GPS': return <Radio className="w-5 h-5" />;
+      case 'Communication': return <Radio className="w-5 h-5" />;
+      case 'Power Grid': return <Zap className="w-5 h-5" />;
+      default: return <Shield className="w-5 h-5" />;
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Infrastructure Impact Analysis
-        </h1>
-        <p className="text-gray-600">
-          Risk assessment for critical systems
-        </p>
-        {error && (
-          <div className="mt-2 text-orange-600 text-sm">⚠ {error}</div>
-        )}
-      </motion.div>
-
-      {/* Summary Alert */}
-      {affectedCount > 0 && (
+    <div className="min-h-screen bg-gray-950">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header with Gradient Text */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 bg-red-50 border-2 border-red-600 rounded-lg p-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          <div className="flex items-center space-x-3">
-            <div className="text-red-600 text-2xl">⚠</div>
-            <div>
-              <h3 className="text-red-700 font-semibold text-lg">
-                {affectedCount} System{affectedCount > 1 ? 's' : ''} at Risk
-              </h3>
-              <p className="text-gray-700 text-sm">
-                Affected: {impactData?.affected_systems.join(', ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-              </p>
+          <h1 className="text-5xl font-display font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 bg-clip-text text-transparent mb-3 uppercase tracking-wider">
+            Infrastructure Impact Analysis
+          </h1>
+          <p className="text-gray-400 text-lg font-mono uppercase tracking-widest">
+            Risk Assessment • Critical Systems • Real-Time Monitoring
+          </p>
+          {error && (
+            <div className="mt-3 text-amber-400 text-sm font-mono flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4" />
+              <span>⚠ {error}</span>
             </div>
-          </div>
-        </motion.div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Risk Distribution
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="#d1d5db" />
-              <PolarAngleAxis dataKey="category" stroke="#4b5563" style={{ fontSize: '14px', fontWeight: 500 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#4b5563" />
-              <Radar 
-                name="Risk Level" 
-                dataKey="risk" 
-                stroke="#dc2626" 
-                fill="#ef4444" 
-                fillOpacity={0.3} 
-                strokeWidth={2}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  color: '#1f2937'
-                }}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+          )}
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Impact Details
-          </h2>
-          <div className="space-y-4">
-            {radarData.map((item) => (
-              <div key={item.category} className="relative">
-                <div className="flex justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-800 font-medium">{item.category}</span>
-                    {item.affected && (
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full border-2 border-red-600">
-                        AFFECTED
-                      </span>
-                    )}
-                  </div>
-                  <span className={`font-semibold ${getStatusColor(item.status, item.affected)}`}>
-                    {item.risk.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                  <div
-                    className={`h-3 rounded-full transition-all duration-500 ${
-                      item.affected ? 'bg-red-600 animate-pulse' :
-                      item.risk > 70 ? 'bg-red-600' : 
-                      item.risk > 40 ? 'bg-orange-600' : 
-                      item.risk > 20 ? 'bg-yellow-600' :
-                      'bg-green-600'
-                    }`}
-                    style={{ width: `${item.risk}%` }}
-                  />
-                </div>
-                <div className="mt-1 flex justify-between items-center">
-                  <span className={`text-xs font-semibold ${getStatusColor(item.status, item.affected)}`}>
-                    {item.affected ? 'AFFECTED - ' : ''}{item.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Detailed System Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {radarData.map((item, index) => (
+        {/* Summary Alert */}
+        {affectedCount > 0 && (
           <motion.div
-            key={item.category}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`bg-white rounded-lg p-4 border-2 shadow-lg ${
-              item.affected ? 'border-red-600 bg-red-50' : 'border-gray-200'
-            }`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 bg-red-900/30 backdrop-blur-md border border-red-500/50 rounded-xl p-5"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-800">{item.category}</h3>
-              {item.affected && (
-                <div className="text-red-600 text-2xl animate-pulse">⚠️</div>
-              )}
-            </div>
-            
-            <div className={`text-3xl font-bold mb-2 ${getStatusColor(item.status, item.affected)}`}>
-              {item.risk.toFixed(0)}%
-            </div>
-            
-            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border-2 ${getStatusBadgeColor(item.status, item.affected)}`}>
-              {item.affected ? '⚠ AFFECTED' : item.status}
-            </div>
-            
-            <div className={`mt-3 text-xs font-semibold ${item.affected ? 'text-red-700' : 'text-gray-600'}`}>
-              {item.affected ? 
-                '🔴 System is currently at risk' : 
-                '✓ System operating normally'
-              }
+            <div className="flex items-center space-x-4">
+              <AlertTriangle className="w-8 h-8 text-red-400 animate-pulse" />
+              <div>
+                <h3 className="text-red-400 font-display font-bold text-xl uppercase tracking-wider">
+                  {affectedCount} System{affectedCount > 1 ? 's' : ''} at Risk
+                </h3>
+                <p className="text-gray-300 text-sm font-mono mt-1">
+                  Affected: {impactData?.affected_systems.join(', ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                </p>
+              </div>
             </div>
           </motion.div>
-        ))}
-      </div>
+        )}
 
-      {/* Timestamp */}
-      {impactData?.timestamp && (
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Last updated: {new Date(impactData.timestamp).toLocaleString()}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Risk Distribution Radar Chart */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mission-panel p-6 rounded-2xl backdrop-blur-xl hover-lift"
+          >
+            <h2 className="text-2xl font-display font-bold text-cyber-cyan uppercase tracking-wider mb-6 flex items-center space-x-2">
+              <Shield className="w-6 h-6" />
+              <span>Risk Distribution</span>
+            </h2>
+            <ResponsiveContainer width="100%" height={320}>
+              <RadarChart data={radarData}>
+                <PolarGrid stroke="rgba(0, 217, 255, 0.2)" />
+                <PolarAngleAxis 
+                  dataKey="category" 
+                  stroke="#e4e4e7" 
+                  style={{ fontSize: '12px', fontFamily: 'monospace', fill: '#9ca3af' }}
+                  tick={{ fill: '#9ca3af' }}
+                />
+                <PolarRadiusAxis 
+                  angle={90} 
+                  domain={[0, 100]} 
+                  stroke="#e4e4e7"
+                  style={{ fontSize: '12px', fontFamily: 'monospace' }}
+                  tick={{ fill: '#9ca3af' }}
+                />
+                <Radar 
+                  name="Risk Level" 
+                  dataKey="risk" 
+                  stroke="#ff4444" 
+                  fill="#ff4444" 
+                  fillOpacity={0.5} 
+                  strokeWidth={3}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)', 
+                    border: '1px solid rgba(255, 68, 68, 0.5)',
+                    borderRadius: '12px',
+                    color: '#e4e4e7',
+                    boxShadow: '0 0 20px rgba(255, 68, 68, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    fontFamily: 'monospace'
+                  }}
+                  labelStyle={{ color: '#ff4444', fontWeight: 'bold' }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </motion.div>
+
+          {/* Impact Details */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mission-panel p-6 rounded-2xl backdrop-blur-xl hover-lift"
+          >
+            <h2 className="text-2xl font-display font-bold text-cyber-cyan uppercase tracking-wider mb-6">
+              Impact Details
+            </h2>
+            <div className="space-y-5">
+              {radarData.map((item) => (
+                <div key={item.category} className="relative">
+                  <div className="flex justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-100 font-display font-semibold text-sm uppercase tracking-wider">{item.category}</span>
+                      {item.affected && (
+                        <span className="text-[10px] bg-red-500/30 text-red-400 px-2 py-0.5 rounded-full border border-red-500/50 font-mono uppercase">
+                          AFFECTED
+                        </span>
+                      )}
+                    </div>
+                    <span className={`font-mono font-bold text-lg ${getStatusColor(item.status, item.affected)}`}>
+                      {item.risk.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden border border-gray-700/50">
+                    <div
+                      className={`h-3 rounded-full transition-all duration-500 ${
+                        item.affected ? 'bg-gradient-to-r from-red-500 to-red-600 animate-pulse' :
+                        item.risk > 70 ? 'bg-gradient-to-r from-red-500 to-orange-500' : 
+                        item.risk > 40 ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 
+                        item.risk > 20 ? 'bg-gradient-to-r from-amber-500 to-yellow-500' :
+                        'bg-gradient-to-r from-green-500 to-cyan-500'
+                      }`}
+                      style={{ width: `${item.risk}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className={`text-xs font-mono font-bold uppercase tracking-wider ${getStatusColor(item.status, item.affected)}`}>
+                      {item.affected ? 'AFFECTED • ' : ''}{item.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
-      )}
+
+        {/* Detailed System Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {radarData.map((item, index) => (
+            <motion.div
+              key={item.category}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.1 }}
+              className={`mission-panel p-5 rounded-xl backdrop-blur-md hover-lift ${
+                item.affected ? 'border-red-500/70 bg-red-900/20' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <div className={item.affected ? 'text-red-400' : 'text-cyan-400'}>
+                    {getCategoryIcon(item.category)}
+                  </div>
+                  <h3 className="text-base font-display font-bold text-gray-100 uppercase tracking-wide">{item.category}</h3>
+                </div>
+                {item.affected && (
+                  <AlertTriangle className="w-5 h-5 text-red-400 animate-pulse" />
+                )}
+              </div>
+              
+              <div className={`text-4xl font-mono font-black mb-3 ${getStatusColor(item.status, item.affected)}`}>
+                {item.risk.toFixed(0)}%
+              </div>
+              
+              <div className={`inline-block px-3 py-1.5 rounded-lg text-xs font-mono font-bold border backdrop-blur-md ${getStatusBadgeColor(item.status, item.affected)} uppercase tracking-wider`}>
+                {item.affected ? '⚠ AFFECTED' : item.status}
+              </div>
+              
+              <div className={`mt-4 text-xs font-mono font-semibold ${item.affected ? 'text-red-400' : 'text-gray-400'} uppercase tracking-wider`}>
+                {item.affected ? 
+                  '🔴 System at Risk' : 
+                  '✓ Operational'
+                }
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Timestamp */}
+        {impactData?.timestamp && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-8 text-center text-sm text-gray-500 font-mono uppercase tracking-wider"
+          >
+            Last Updated: {new Date(impactData.timestamp).toLocaleString()} UTC
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };

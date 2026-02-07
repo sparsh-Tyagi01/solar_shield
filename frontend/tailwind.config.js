@@ -4,8 +4,33 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'body': ['Inter', 'system-ui', 'sans-serif'],
+        'display': ['Orbitron', 'Space Grotesk', 'system-ui', 'sans-serif'],
+        'mono': ['Roboto Mono', 'Courier New', 'monospace'],
+      },
       colors: {
-        // Professional blue-gray palette
+        // NASA Mission Control Color Palette
+        space: {
+          50: '#e4e4e7',
+          100: '#1a1f3a',
+          200: '#151829',
+          300: '#0d1117',
+          400: '#0a0e27',
+          500: '#080b1f',
+        },
+        cyber: {
+          cyan: '#00d9ff',
+          'cyan-bright': '#00f0ff',
+          blue: '#4d7cff',
+          'blue-electric': '#5865f2',
+          amber: '#ffb020',
+          'amber-bright': '#ffc850',
+          red: '#ff4444',
+          'red-orange': '#ff6b35',
+          green: '#00ff88',
+          'green-neon': '#00ff41',
+        },
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -30,6 +55,60 @@ module.exports = {
           800: '#1e293b',
           900: '#0f172a',
         },
+        solar: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        aurora: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-alert': 'pulse-alert 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'scan': 'scan 3s linear infinite',
+        'radar-sweep': 'radar-sweep 4s linear infinite',
+        'blink': 'blink 1s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 5px rgba(0, 217, 255, 0.5), 0 0 20px rgba(0, 217, 255, 0.3)' },
+          '100%': { boxShadow: '0 0 10px rgba(0, 217, 255, 0.8), 0 0 40px rgba(0, 217, 255, 0.5)' },
+        },
+        'radar-sweep': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        blink: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },

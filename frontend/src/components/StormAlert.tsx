@@ -40,30 +40,34 @@ const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0, co
 
   const alertConfig = {
     critical: {
-      bg: 'bg-red-50',
-      border: 'border-red-500',
-      text: 'text-red-700',
+      gradient: 'from-red-500/30 to-red-600/30',
+      border: 'border-red-500/70',
+      text: 'text-red-300',
+      glowColor: 'shadow-red-500/50',
       icon: ExclamationTriangleIcon,
       message: 'CRITICAL: Major geomagnetic storm imminent',
     },
     warning: {
-      bg: 'bg-orange-50',
-      border: 'border-orange-500',
-      text: 'text-orange-700',
+      gradient: 'from-orange-500/30 to-orange-600/30',
+      border: 'border-orange-500/70',
+      text: 'text-orange-300',
+      glowColor: 'shadow-orange-500/50',
       icon: ExclamationTriangleIcon,
       message: 'WARNING: Moderate storm conditions expected',
     },
     watch: {
-      bg: 'bg-yellow-50',
-      border: 'border-yellow-500',
-      text: 'text-yellow-700',
+      gradient: 'from-yellow-500/30 to-yellow-600/30',
+      border: 'border-yellow-500/70',
+      text: 'text-yellow-300',
+      glowColor: 'shadow-yellow-500/50',
       icon: ExclamationTriangleIcon,
       message: 'WATCH: Minor storm activity possible',
     },
     normal: {
-      bg: 'bg-green-50',
-      border: 'border-green-500',
-      text: 'text-green-700',
+      gradient: 'from-aurora-500/30 to-aurora-600/30',
+      border: 'border-aurora-500/70',
+      text: 'text-aurora-300',
+      glowColor: 'shadow-aurora-500/50',
       icon: ShieldCheckIcon,
       message: 'All systems normal - No storm activity',
     },
@@ -74,9 +78,9 @@ const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0, co
 
   // Determine confidence color
   const getConfidenceColor = (conf: number) => {
-    if (conf >= 80) return 'text-green-600';
-    if (conf >= 60) return 'text-yellow-600';
-    return 'text-orange-600';
+    if (conf >= 80) return 'text-aurora-400';
+    if (conf >= 60) return 'text-yellow-400';
+    return 'text-orange-400';
   };
 
   const getConfidenceLabel = (conf: number) => {
@@ -91,29 +95,51 @@ const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0, co
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`${config.bg} ${config.border} border-2 rounded-lg p-6 mb-6`}
+      whileHover={{ scale: 1.01 }}
+      className={`
+        glass-effect rounded-xl p-6 mb-6 
+        bg-gradient-to-br ${config.gradient}
+        border-2 ${config.border}
+        shadow-xl ${config.glowColor}
+        hover-lift
+      `}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <Icon className={`w-8 h-8 ${config.text}`} />
+          <motion.div
+            animate={{ 
+              scale: level === 'critical' ? [1, 1.2, 1] : 1,
+              rotate: level === 'critical' ? [0, 5, -5, 0] : 0
+            }}
+            transition={{ 
+              repeat: level === 'critical' ? Infinity : 0,
+              duration: 1 
+            }}
+          >
+            <Icon className={`w-10 h-10 ${config.text} drop-shadow-lg`} />
+          </motion.div>
           <div>
-            <h3 className={`text-xl font-bold ${config.text}`}>
+            <h3 className={`text-2xl font-display font-bold ${config.text} drop-shadow`}>
               {config.message}
             </h3>
-            <div className="flex items-center space-x-6 mt-2">
-              <p className="text-slate-700">
-                Storm Probability: <span className="font-semibold">{(probability * 100).toFixed(1)}%</span>
-              </p>
-              {severity > 0 && (
-                <p className="text-slate-700">
-                  Severity Score: <span className="font-semibold">{severity.toFixed(2)}</span>
+            <div className="flex items-center space-x-6 mt-3">
+              <div className="glass-effect px-3 py-1.5 rounded-lg">
+                <p className="text-slate-200 text-sm">
+                  Storm Probability: <span className="font-bold text-white">{(probability * 100).toFixed(1)}%</span>
                 </p>
+              </div>
+              {severity > 0 && (
+                <div className="glass-effect px-3 py-1.5 rounded-lg">
+                  <p className="text-slate-200 text-sm">
+                    Severity: <span className="font-bold text-white">{severity.toFixed(2)}</span>
+                  </p>
+                </div>
               )}
               {/* NEW: Confidence Score Display */}
-              <div className="flex items-center space-x-2">
+              <div className="glass-effect px-3 py-1.5 rounded-lg flex items-center space-x-2">
                 <CheckBadgeIcon className={`w-5 h-5 ${getConfidenceColor(confidence)}`} />
-                <p className={`${getConfidenceColor(confidence)} font-medium`}>
-                  Confidence: {confidence.toFixed(0)}% ({getConfidenceLabel(confidence)})
+                <p className={`${getConfidenceColor(confidence)} font-semibold text-sm`}>
+                  {confidence.toFixed(0)}% ({getConfidenceLabel(confidence)})
                 </p>
               </div>
             </div>

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
-import RealTimeMetrics from '../components/RealTimeMetrics';
-import StormAlert from '../components/StormAlert';
-import SolarWindChart from '../components/SolarWindChart';
-import SatelliteMonitor from '../components/SatelliteMonitor';
-import RadiationChart from '../components/RadiationChart';
-import AffectedRegionsMap from '../components/AffectedRegionsMap';
-import ModelImprovementStatus from '../components/ModelImprovementStatus';
+import LiveDataTicker from '../components/LiveDataTicker';
+import ThreatLevelBanner from '../components/ThreatLevelBanner';
+import SatelliteFleetGrid from '../components/SatelliteFleetGrid';
+import ScientificGraphs from '../components/ScientificGraphs';
+import AlertSystem from '../components/AlertSystem';
+import SolarHeatmap from '../components/SolarHeatmap';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
 
@@ -132,259 +131,157 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      {/* Live Data Ticker - Always at Top */}
+      <LiveDataTicker data={currentData} />
+
+      {/* Alert System - Right Side Panel */}
+      <AlertSystem predictions={predictions} currentData={currentData} />
+
+      {/* Main Mission Control Container */}
+      <div className="container mx-auto px-6 py-6">
+        {/* Mission Control Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            SolarShield - Real-Time Monitoring
-          </h1>
-          <p className="text-slate-600">
-            Space Weather Intelligence & Satellite Health Monitoring
-          </p>
-        </motion.div>
-
-        {/* Connection Status Banner */}
-        {!backendConnected && connectionError && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 bg-red-50 border-2 border-red-500 rounded-lg p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="text-red-500 text-3xl">⚠️</div>
-                <div>
-                  <h3 className="text-red-700 font-semibold text-lg">Backend Server Not Connected</h3>
-                  <p className="text-red-600 text-sm">{connectionError}</p>
-                  <p className="text-red-700 text-xs mt-1">Start with: <code className="bg-red-100 px-2 py-1 rounded">uvicorn backend.main:app --reload</code></p>
-                </div>
-              </div>
-              <button
-                onClick={fetchCurrentData}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-              >
-                Retry
-              </button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-display font-black text-cyber-cyan uppercase tracking-wider mb-1">
+                SOLARGUARD 3D
+              </h1>
+              <p className="text-sm text-space-50 font-mono uppercase tracking-widest">
+                Mission Control • Real-Time Monitoring
+              </p>
             </div>
-          </motion.div>
-        )}
-
-        {backendConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-green-600 text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Backend Connected</span>
-              </div>
-              {satellites.length > 0 && (
-                <div className="flex items-center space-x-2 text-blue-600 text-sm">
-                  <span className="font-semibold">
-                    {satellites.filter((s: any) => s.real_data).length}/{satellites.length} satellites with LIVE tracking
+            <div className="flex items-center space-x-4">
+              {backendConnected ? (
+                <div className="flex items-center space-x-2 mission-panel px-4 py-2">
+                  <div className="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></div>
+                  <span className="text-xs text-cyber-green font-mono uppercase tracking-wider">
+                    System Operational
                   </span>
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-600 font-semibold">
-                    REAL DATA
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 mission-panel px-4 py-2 border-cyber-red">
+                  <div className="w-2 h-2 bg-cyber-red rounded-full animate-blink"></div>
+                  <span className="text-xs text-cyber-red font-mono uppercase tracking-wider">
+                    Connection Lost
                   </span>
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
 
-        {predictions && predictions.risk_level && (
-          <StormAlert
-            level={predictions.risk_level}
-            probability={predictions.probability || predictions.storm_probability || 0}
-            severity={predictions.severity || currentData?.kp_index || 3}
-            confidence={predictions.confidence || 85}
+        {/* Threat Level Banner */}
+        {backendConnected && (
+          <ThreatLevelBanner 
+            predictions={predictions}
+            severity={predictions?.severity || currentData?.kp_index || 0}
+            nextUpdateIn={300}
           />
         )}
 
-        {/* Model Improvement Status - NEW FEATURE */}
-        <ModelImprovementStatus />
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+          {/* Left Panel - 3D Earth & Controls */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* 3D Visualization */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mission-panel p-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-display font-bold text-cyber-cyan uppercase tracking-wider">
+                  Real-Time 3D Solar System
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></div>
+                  <span className="text-xs text-space-50 font-mono">LIVE</span>
+                </div>
+              </div>
+              
+              {!backendConnected ? (
+                <div className="w-full h-[500px] flex items-center justify-center bg-space-300/30 rounded-lg radar-grid">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">🛰️</div>
+                    <div className="data-value text-xl mb-2">Awaiting Backend Connection</div>
+                    <div className="text-sm text-space-50 font-mono mb-4">Initializing satellite tracking systems...</div>
+                    <button
+                      onClick={fetchCurrentData}
+                      className="px-6 py-3 bg-cyber-cyan text-space-400 rounded-lg hover:bg-cyber-cyan-bright transition-colors font-display font-bold uppercase tracking-wide text-sm"
+                    >
+                      Establish Connection
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-[500px] radar-grid rounded-lg overflow-hidden">
+                  <SolarSystemVisualization
+                    radiationLevel={radiationLevel}
+                    bzValue={currentData?.bz || 0}
+                    solarWindSpeed={currentData?.speed || 400}
+                    protonFlux={currentData?.proton_flux || 1.0}
+                    xrayFlux={currentData?.xray_flux || 1e-6}
+                    magneticFieldStrength={magneticFieldStrength}
+                    onSatelliteUpdate={handleSatelliteUpdate}
+                  />
+                </div>
+              )}
+              
+              <div className="mt-3 pt-3 border-t border-cyber-cyan/20">
+                <p className="text-[10px] text-space-50 font-mono uppercase tracking-wider text-center">
+                  {backendConnected 
+                    ? `Interactive Orbit View • ${satellites.length} Assets Tracked • Real-Time Solar Wind Simulation`
+                    : 'System Standby • Awaiting Real-Time Data Stream'}
+                </p>
+              </div>
+            </motion.div>
 
-        {/* Fleet Status Summary */}
+            {/* Scientific Graphs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ScientificGraphs currentData={currentData} />
+            </motion.div>
+          </div>
+
+          {/* Right Panel - Data & Metrics */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Solar Activity Heatmap */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <SolarHeatmap 
+                title="Solar Activity Matrix"
+                colorScheme="solar"
+                showLegend={true}
+              />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Satellite Fleet Status Grid */}
         {satellites.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
             className="mb-6"
           >
-            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Fleet Status Summary</h3>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{fleetStats.total}</div>
-                <div className="text-xs text-slate-600">Total</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{fleetStats.healthy}</div>
-                <div className="text-xs text-slate-600">Healthy</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{fleetStats.degraded}</div>
-                <div className="text-xs text-slate-600">Degraded</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{fleetStats.critical}</div>
-                <div className="text-xs text-slate-600">Critical</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{fleetStats.avgHealth}%</div>
-                <div className="text-xs text-slate-600">Avg Health</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{fleetStats.avgDegradation}%</div>
-                <div className="text-xs text-slate-600">Avg Degradation</div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Impact Systems Alert - Only show when there's actual risk */}
-      {impactData && 
-       impactData.affected_systems && 
-       Array.isArray(impactData.affected_systems) && 
-       impactData.affected_systems.length > 0 && 
-       (predictions?.severity > 6 || predictions?.probability > 0.6) && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 bg-red-50 border-2 border-red-500 rounded-lg p-4 shadow-lg"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="text-red-600 text-3xl">⚠️</div>
-            <div>
-              <h3 className="text-red-700 font-bold text-lg">
-                {impactData.affected_systems.length} System(s) at Risk
-              </h3>
-              <p className="text-red-600 text-sm">
-                Affected: {impactData.affected_systems.map((s: string) => 
-                  s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-                ).join(', ')}
-              </p>
-              <p className="text-red-500 text-xs mt-1">
-                Storm Severity: {predictions?.severity?.toFixed(1) || 'N/A'} • 
-                Probability: {((predictions?.probability || 0) * 100).toFixed(0)}%
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      <div className="grid grid-cols-1 gap-6 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Solar System - Real-Time 3D Visualization
-          </h2>
-          {!backendConnected ? (
-            <div className="w-full h-[600px] flex items-center justify-center bg-gray-100 rounded-lg border-2 border-red-300">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🛰️</div>
-                <div className="text-red-600 text-xl font-semibold mb-2">Waiting for Backend Connection</div>
-                <div className="text-slate-600 text-sm">Satellites will appear once connected to the server</div>
-                <button
-                  onClick={fetchCurrentData}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Connect to Backend
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full h-[600px]">
-              <SolarSystemVisualization
+            <SatelliteFleetGrid 
+              satellites={satellites} 
               radiationLevel={radiationLevel}
-              bzValue={currentData?.bz || 0}
-              solarWindSpeed={currentData?.speed || 400}
-              protonFlux={currentData?.proton_flux || 1.0}
-              xrayFlux={currentData?.xray_flux || 1e-6}
-              magneticFieldStrength={magneticFieldStrength}
-              onSatelliteUpdate={handleSatelliteUpdate}
-              />
-            </div>
-          )}
-          <p className="text-xs text-slate-500 mt-2 text-center">
-            {backendConnected 
-              ? 'Drag to rotate • Scroll to zoom • 6 satellites tracked • Sun radiation and Earth\'s magnetic field based on real ML model data'
-              : 'Connect to backend to see real-time satellite data'}
-          </p>
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Real-Time Metrics
-          </h2>
-          <RealTimeMetrics data={currentData} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
-        >
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Solar Wind Parameters
-          </h2>
-          <SolarWindChart />
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Satellite Fleet Monitor
-          </h2>
-          <SatelliteMonitor 
-            satellites={satellites} 
-            radiationLevel={radiationLevel}
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <RadiationChart currentRadiation={radiationLevel} />
-        </motion.div>
-      </div>
-
-      {/* Global Coverage Map */}
-      {satellites.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="mb-6"
-        >
-          <AffectedRegionsMap satellites={satellites} />
-        </motion.div>
-      )}
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   );

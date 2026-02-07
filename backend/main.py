@@ -877,6 +877,143 @@ async def get_historical_data(time_range: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Historical Storms Data
+HISTORICAL_STORMS = {
+    "carrington-1859": {
+        "id": "carrington-1859",
+        "name": "Carrington Event",
+        "date": "September 1-2, 1859",
+        "year": 1859,
+        "severity": 10,
+        "max_kp": 9,
+        "max_speed": 2000,
+        "max_bz": -150,
+        "description": "The most intense geomagnetic storm in recorded history",
+    },
+    "halloween-2003": {
+        "id": "halloween-2003",
+        "name": "Halloween Storm",
+        "date": "October 28-31, 2003",
+        "year": 2003,
+        "severity": 9,
+        "max_kp": 9,
+        "max_speed": 2000,
+        "max_bz": -50,
+        "description": "One of the largest solar storms in modern history",
+    },
+    "quebec-1989": {
+        "id": "quebec-1989",
+        "name": "March 1989 Storm",
+        "date": "March 13-14, 1989",
+        "year": 1989,
+        "severity": 8,
+        "max_kp": 9,
+        "max_speed": 1200,
+        "max_bz": -40,
+        "description": "Caused catastrophic power failure in Quebec",
+    },
+    "bastille-2000": {
+        "id": "bastille-2000",
+        "name": "Bastille Day Event",
+        "date": "July 14-15, 2000",
+        "year": 2000,
+        "severity": 7,
+        "max_kp": 8,
+        "max_speed": 1800,
+        "max_bz": -35,
+        "description": "Powerful X5.7-class flare caused radio blackouts",
+    }
+}
+
+
+@app.get("/api/historical-storms")
+async def get_historical_storms():
+    """Get data about major historical solar storms for Time Machine feature"""
+    try:
+        return {
+            "storms": list(HISTORICAL_STORMS.values()),
+            "total": len(HISTORICAL_STORMS)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching historical storms: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/historical-storms/{storm_id}/counterfactual")
+async def calculate_counterfactual(storm_id: str):
+    """
+    Calculate counterfactual analysis: What if this historical storm hit today?
+    
+    NEW FEATURE: Solar Storm Time Machine
+    """
+    try:
+        if storm_id not in HISTORICAL_STORMS:
+            raise HTTPException(status_code=404, detail="Storm not found")
+        
+        storm = HISTORICAL_STORMS[storm_id]
+        
+        # Get current satellite count (approximate)
+        current_satellites = len(satellite_fleet) if satellite_fleet else 8000
+        historical_satellites = 100 if storm["year"] < 2000 else 800 if storm["year"] < 2010 else 1500
+        
+        # Calculate risk based on severity
+        risk_percentage = min(95, (storm["severity"] / 10) * 100)
+        satellites_at_risk = int(current_satellites * (risk_percentage / 100))
+        
+        # Calculate economic impact (scaled to modern infrastructure)
+        base_multiplier = current_satellites / historical_satellites
+        economic_multiplier = storm["severity"] * base_multiplier * 2
+        min_loss = economic_multiplier * 1.5
+        max_loss = economic_multiplier * 3
+        
+        # Determine affected regions
+        if storm["severity"] >= 9:
+            affected_regions = ["North America", "Europe", "Asia", "Australia", "South America"]
+        elif storm["severity"] >= 7:
+            affected_regions = ["North America", "Europe", "Northern Asia"]
+        else:
+            affected_regions = ["North America", "Northern Europe"]
+        
+        # Critical infrastructure
+        infrastructure = [
+            "GPS & Navigation Systems",
+            "Telecommunications",
+            "Power Grids",
+            "Aviation Systems",
+            "Financial Networks",
+            "Internet Backbone"
+        ]
+        if storm["severity"] > 8:
+            infrastructure.extend(["Emergency Services", "Military Communications"])
+        
+        # Recovery time estimation
+        if storm["severity"] > 8:
+            recovery_time = "2-6 weeks"
+        elif storm["severity"] > 6:
+            recovery_time = "5-14 days"
+        else:
+            recovery_time = "2-7 days"
+        
+        return {
+            "storm": storm,
+            "counterfactual": {
+                "satellites_at_risk": satellites_at_risk,
+                "total_satellites": current_satellites,
+                "estimated_loss": f"${min_loss:.1f}B - ${max_loss:.1f}B",
+                "affected_regions": affected_regions,
+                "critical_infrastructure": infrastructure,
+                "recovery_time": recovery_time,
+                "comparison_to_historical": f"{int(base_multiplier * 100)}% more satellites at risk compared to {storm['year']}"
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error calculating counterfactual: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/models/info")
 async def get_models_info():
     """Get information about loaded models"""
