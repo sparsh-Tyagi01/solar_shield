@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Brain, TrendingUp, AlertTriangle, Activity, Zap } from 'lucide-react';
 
 const StormPrediction: React.FC = () => {

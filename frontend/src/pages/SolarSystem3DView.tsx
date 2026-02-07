@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
-import SatelliteMonitor from '../components/SatelliteMonitor';
-import AffectedRegionsMap from '../components/AffectedRegionsMap';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
 
