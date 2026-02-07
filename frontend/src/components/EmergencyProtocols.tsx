@@ -291,6 +291,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
       }
     });
     setTimeRemaining(initialTimers);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpIndex, stormProbability, imfBz, satelliteHealth]);
 
   // Timer countdown

@@ -48,7 +48,6 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
     const kp = currentData?.kp_index || 0;
     const speed = currentData?.speed || 0;
     const stormProb = predictions?.probability || 0;
-    const density = currentData?.density || 5;
     const bz = currentData?.bz || 0;
 
     // Project future conditions based on current trends and dayOffset

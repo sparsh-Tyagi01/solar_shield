@@ -1,0 +1,36 @@
+# Core API dependencies
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# Data science & ML
+numpy
+pandas
+scikit-learn
+xgboost<2.1  # Version < 2.1 required for SHAP compatibility
+tensorflow  # Required for LSTM models
+
+# Model interpretation
+shap  # Requires LLVM 20 (install via: brew install llvm@20)
+
+# Data fetching
+requests
+aiohttp
+
+# Utilities
+python-dateutil
+pytz
+joblib
+
+# WebSocket support
+websockets
+
+# Logging
+loguru
+
+# Environment variables
+python-dotenv
+
+# AI/Chatbot
+anthropic  # Claude AI integration for SOLAR-GPT chatbot

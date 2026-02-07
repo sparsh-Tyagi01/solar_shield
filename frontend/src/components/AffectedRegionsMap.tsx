@@ -449,8 +449,10 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites, kpI
     ctx.fillText(`Total Satellites: ${totalSats}`, statsX + 15, statsY + 40);
     ctx.fillStyle = '#50d0ff';
     ctx.fillText(`● Operational: ${operational}`, statsX + 15, statsY + 56);
+    ctx.fillStyle = '#ffaa00';
+    ctx.fillText(`● Degraded: ${degraded}`, statsX + 15, statsY + 68);
     ctx.fillStyle = '#ff3232';
-    ctx.fillText(`● Critical: ${critical}`, statsX + 15, statsY + 68);
+    ctx.fillText(`● Critical: ${critical}`, statsX + 15, statsY + 80);
     
     // Draw timestamp
     const now = new Date();
@@ -463,6 +465,7 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites, kpI
   useEffect(() => {
     console.log('AffectedRegionsMap: Satellites updated, count:', satellites.length);
     drawMap();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [satellites, hoveredSatellite]);
 
   // Animation loop for pulsing effect
@@ -472,6 +475,7 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites, kpI
     }, 50);
 
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [satellites, hoveredSatellite]);
 
   // Handle mouse movement for tooltips

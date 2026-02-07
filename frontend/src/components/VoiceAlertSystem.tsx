@@ -134,7 +134,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
       severity
     };
     setAlertHistory(prev => [newAlert, ...prev].slice(0, 20)); // Keep last 20
-  }, [isEnabled, volume, selectedVoice, availableVoices]);
+  }, [isEnabled, volume, selectedVoice, availableVoices, isOnCooldown]);
 
   // Monitor conditions and trigger alerts
   useEffect(() => {
