@@ -21,8 +21,10 @@
    Branch: main
    
    Build Command: pip install -r requirements.txt
-   Start Command: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+   Start Command: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
    ```
+   
+   > **Important**: Use `python -m uvicorn` (not just `uvicorn`) to ensure proper module imports
 
 3. **Set Environment Variables**
    Click "Environment" and add:
@@ -95,6 +97,27 @@ If you need to manually trigger a deploy:
 ✅ **Solution**: This is now fixed. The app binds to `0.0.0.0:$PORT` automatically.
 
 Verify in logs:
+```
+INFO: Starting server on 0.0.0.0:10000
+INFO: Uvicorn running on http://0.0.0.0:10000
+```
+
+### Module Not Found Error
+❌ **Error**: "ModuleNotFoundError: No module named 'backend'"
+
+✅ **Solution**: Fixed by using `python -m uvicorn` instead of just `uvicorn` in the start command.
+
+This ensures Python's module system properly resolves the `backend` package from the project root.
+
+**Verify your start command is:**
+```bash
+python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+```
+
+**Alternative solution** (if still having issues):
+Use the provided startup script:
+```bash
+bash start_server.sh
 ```
 INFO: Starting server on 0.0.0.0:10000
 INFO: Uvicorn running on http://0.0.0.0:10000

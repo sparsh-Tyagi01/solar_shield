@@ -27,8 +27,14 @@ port = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
 ### Start Command
 ```bash
 # Render automatically provides $PORT environment variable
-uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+# Use python -m to ensure proper module imports
+python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
 ```
+
+**Why `python -m uvicorn`?**
+- Ensures Python's module system is used
+- Properly resolves `backend` package imports
+- More reliable than calling `uvicorn` directly
 
 ## Quick Deploy to Render
 
@@ -42,7 +48,7 @@ uvicorn backend.main:app --host 0.0.0.0 --port $PORT
 2. **In Render Dashboard**
    - New → Web Service
    - Connect GitHub repo
-   - Start Command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+   - Start Command: `python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
    - Add environment variables (see RENDER_DEPLOYMENT.md)
 
 3. **Deploy**
@@ -84,7 +90,22 @@ After deployment, check:
 
 **Fix**: ✅ Already fixed in current code
 
-### ❌ "Module not found"
+### ❌ "ModuleNotFoundError: No module named 'backend'"
+**Cause**: Python can't find the backend package
+
+**Fix**: ✅ Fixed by using `python -m uvicorn` instead of just `uvicorn`
+
+Ensure your start command is:
+```bash
+python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+```
+
+Alternative: Use the startup script:
+```bash
+bash start_server.sh
+```
+
+### ❌ "Module not found" (other packages)
 **Cause**: Missing dependencies in requirements.txt
 
 **Fix**: Ensure all imports are in requirements.txt
