@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 import { 
   RadarChart, 
   PolarGrid, 
@@ -40,10 +41,10 @@ const ImpactAnalysis: React.FC = () => {
 
   const fetchImpactData = async () => {
     try {
-      const conditionsResponse = await axios.get('http://localhost:8000/api/current-conditions');
+      const conditionsResponse = await axios.get(API.currentConditions);
       const conditions = conditionsResponse.data;
       
-      const response = await axios.post('http://localhost:8000/predict/impact', {
+      const response = await axios.post(API.predictImpact, {
         bz: conditions.bz,
         speed: conditions.speed,
         density: conditions.density,

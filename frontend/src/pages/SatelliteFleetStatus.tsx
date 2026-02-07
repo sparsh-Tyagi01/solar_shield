@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 import AffectedRegionsMap from '../components/AffectedRegionsMap';
 import SatelliteMonitor from '../components/SatelliteMonitor';
 import EarthVisualization from '../components/EarthVisualization';
@@ -27,7 +28,7 @@ const SatelliteFleetStatus: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/current-conditions');
+      const response = await axios.get(API.currentConditions);
       setCurrentData(response.data);
       
       const bz = response.data.bz || 0;

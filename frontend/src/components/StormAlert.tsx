@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExclamationTriangleIcon, ShieldCheckIcon, CheckBadgeIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
+import { API } from '../config/api';
 
 interface AlertProps {
   level: string;
@@ -31,7 +32,7 @@ const StormAlert: React.FC<AlertProps> = ({ level, probability, severity = 0, co
   // Fetch economy loss when severity is significant
   useEffect(() => {
     if (severity > 3) {
-      fetch('http://localhost:8000/api/economy-loss/current')
+      fetch(API.economyLoss)
         .then(res => res.json())
         .then(data => setEconomyLoss(data))
         .catch(err => console.error('Error fetching economy loss:', err));

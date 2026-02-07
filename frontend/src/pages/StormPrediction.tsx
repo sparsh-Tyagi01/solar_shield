@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 import { Brain, TrendingUp, AlertTriangle, Activity, Zap } from 'lucide-react';
 
 const StormPrediction: React.FC = () => {
@@ -15,7 +16,7 @@ const StormPrediction: React.FC = () => {
 
   const fetchPredictions = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/predict/storm');
+      const response = await axios.get(API.predictStorm);
       setPredictions(response.data);
       setLoading(false);
     } catch (error) {

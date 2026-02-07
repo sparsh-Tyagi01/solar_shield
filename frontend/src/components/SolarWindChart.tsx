@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { API } from '../config/api';
 
 const SolarWindChart: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
@@ -14,7 +15,7 @@ const SolarWindChart: React.FC = () => {
 
   const fetchHistoricalData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/historical/24h');
+      const response = await axios.get(API.historical('24h'));
       const formattedData = response.data.map((item: any) => ({
         ...item,
         time: format(new Date(item.timestamp), 'HH:mm'),

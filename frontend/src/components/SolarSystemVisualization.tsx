@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere, Stars, Html, Line, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import { API } from '../config/api';
 
 interface SolarSystemProps {
   radiationLevel: number;
@@ -473,7 +474,7 @@ const SolarSystemScene: React.FC<SolarSystemProps> = (props) => {
   useEffect(() => {
     const fetchSatellites = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/satellites');
+        const response = await fetch(API.satellites);
         const data = await response.json();
         console.log('SolarSystemVisualization: Fetched satellites from backend:', data.satellites);
         

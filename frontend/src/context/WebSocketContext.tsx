@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { API } from '../config/api';
 
 interface WebSocketContextType {
   messages: any[];
@@ -20,7 +21,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const connect = () => {
     try {
-      const ws = new WebSocket('ws://localhost:8000/ws');
+      const ws = new WebSocket(API.websocket);
 
       ws.onopen = () => {
         console.log('✅ WebSocket connected');

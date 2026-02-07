@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import axios from 'axios';
+import { API } from '../config/api';
 
 interface ScientificGraphsProps {
   currentData?: any;
@@ -14,7 +15,7 @@ const ScientificGraphs: React.FC<ScientificGraphsProps> = ({ currentData }) => {
     // Fetch real historical data from API
     const fetchHistoricalData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/historical/24h');
+        const response = await axios.get(API.historical('24h'));
         const data = response.data;
         
         // Format data for charts

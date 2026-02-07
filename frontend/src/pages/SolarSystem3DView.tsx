@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
+import { API } from '../config/api';
 
 const SolarSystem3DView: React.FC = () => {
   const [currentData, setCurrentData] = useState<any>(null);
@@ -40,7 +41,7 @@ const SolarSystem3DView: React.FC = () => {
 
   const fetchCurrentData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/current-conditions');
+      const response = await axios.get(API.currentConditions);
       setCurrentData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);

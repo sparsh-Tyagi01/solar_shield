@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChartBarIcon, ArrowTrendingUpIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { API } from '../config/api';
 
 interface ModelPerformance {
   storm_occurrence: {
@@ -53,8 +54,8 @@ const ModelImprovementStatus: React.FC = () => {
   const fetchModelStatus = async () => {
     try {
       const [perfRes, impRes] = await Promise.all([
-        fetch('http://localhost:8000/api/confidence/summary'),
-        fetch('http://localhost:8000/api/model-improvement/status')
+        fetch(API.confidenceSummary),
+        fetch(API.modelImprovementStatus)
       ]);
 
       const perfData = await perfRes.json();

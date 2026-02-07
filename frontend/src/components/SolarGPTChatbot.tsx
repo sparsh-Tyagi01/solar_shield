@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -100,7 +101,7 @@ const SolarGPTChatbot: React.FC<ChatbotProps> = ({ className = '' }) => {
         content: msg.content
       }));
 
-      const response = await axios.post('http://localhost:8000/api/chatbot', {
+      const response = await axios.post(API.chatbot, {
         message: textToSend,
         conversation_history: history
       });

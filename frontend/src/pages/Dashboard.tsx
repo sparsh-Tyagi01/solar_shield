@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { API } from '../config/api';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
 import LiveDataTicker from '../components/LiveDataTicker';
 import ThreatLevelBanner from '../components/ThreatLevelBanner';
@@ -87,8 +88,8 @@ const Dashboard: React.FC = () => {
   const fetchCurrentData = async () => {
     try {
       const [dataRes, predRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/current-conditions'),
-        axios.get('http://localhost:8000/api/predict/storm')
+        axios.get(API.currentConditions),
+        axios.get(API.predictStorm)
       ]);
       
       setCurrentData(dataRes.data);

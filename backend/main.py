@@ -37,6 +37,7 @@ from backend.config import (
     API_HOST,
     API_PORT,
     UPDATE_INTERVAL,
+    FRONTEND_URL,
     STORM_OCCURRENCE_MODEL_PATH,
     STORM_SEVERITY_MODEL_PATH,
     IMPACT_RISK_MODEL_PATH
@@ -54,7 +55,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

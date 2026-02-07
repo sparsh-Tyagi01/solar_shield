@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { Clock, TrendingUp, Activity } from 'lucide-react';
@@ -13,7 +14,7 @@ const HistoricalData: React.FC = () => {
   const fetchHistoricalData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/api/historical/${timeRange}`);
+      const response = await axios.get(API.historical(timeRange));
       const formattedData = response.data.map((item: any) => ({
         ...item,
         time: format(new Date(item.timestamp), timeRange === '24h' ? 'HH:mm' : 'MM/dd HH:mm'),

@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API } from '../config/api';
 
 interface HeatmapProps {
   data?: {
@@ -27,7 +28,7 @@ const SolarHeatmap: React.FC<HeatmapProps> = ({
     // Fetch real historical data from API
     const fetchHistoricalData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/historical/7d');
+        const response = await axios.get(API.historical('7d'));
         const historicalData = response.data;
         
         // Transform historical data into heatmap format

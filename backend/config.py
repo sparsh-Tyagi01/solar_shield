@@ -25,6 +25,7 @@ LOG_DIR.mkdir(exist_ok=True)
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", 8000))
 API_DEBUG = os.getenv("API_DEBUG", "True").lower() == "true"
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # Data Sources
 NASA_OMNI_URL = os.getenv("NASA_OMNI_URL", "https://omniweb.gsfc.nasa.gov/cgi/nx1.cgi")
