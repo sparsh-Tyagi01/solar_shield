@@ -96,7 +96,24 @@ docker run -p 80:80 solarsheild-frontend
 
 ## 📚 Documentation
 
-- [Deployment Guide](DEPLOYMENT.md) - Production deployment instructions
+### 🏗️ Architecture & Design
+- **[Complete System Architecture](docs/ARCHITECTURE.md)** - Comprehensive architecture with data flow diagrams
+- **[Visual Architecture Diagrams](docs/SYSTEM_ARCHITECTURE_DIAGRAM.md)** - Mermaid diagrams for all components
+- **[Technical Specification](docs/TECHNICAL_SPECIFICATION.md)** - Detailed technical specs and requirements
+- **[Project Architecture Summary](docs/PROJECT_INFO.md)** - High-level architecture overview
+
+### 🚀 Deployment & Setup
+- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in minutes
+- **[3D System Setup](docs/QUICK_START_3D.md)** - 3D visualization quick start
+
+### 📖 Feature Documentation
+- **[3D Visualization Guide](docs/3D_VISUALIZATION_GUIDE.md)** - 3D features and implementation details
+- **[Satellite Tracking](docs/SATELLITE_TRACKING.md)** - Real-time satellite monitoring
+- **[Integration Guide](docs/INTEGRATION_GUIDE.md)** - API integration examples
+- **[New Features Summary](docs/NEW_FEATURES_SUMMARY.md)** - Latest feature additions
+
+### 💻 Component Documentation
 - [Backend README](backend/README.md) - Backend API documentation
 - [Frontend README](frontend/README.md) - Frontend development guide
 - [Full Documentation](docs/) - Complete technical documentation
