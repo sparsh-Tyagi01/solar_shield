@@ -24,6 +24,8 @@ interface AlertThresholds {
   stormProbability: number;
 }
 
+const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
 const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
   kpIndex,
   imfBz,
@@ -56,7 +58,6 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
 
   const lastAlertTimesRef = useRef<Record<string, number>>({});
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
   // Load available voices
   useEffect(() => {
@@ -93,11 +94,11 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
   }, [thresholds]);
 
   // Check if alert is on cooldown
-  const isOnCooldown = (alertType: string): boolean => {
+  const isOnCooldown = useCallback((alertType: string): boolean => {
     const lastTime = lastAlertTimesRef.current[alertType];
     if (!lastTime) return false;
     return Date.now() - lastTime < COOLDOWN_MS;
-  };
+  }, []);
 
   // Speak alert message
   const speak = useCallback((message: string, alertType: string, severity: 'info' | 'warning' | 'danger' | 'critical') => {
