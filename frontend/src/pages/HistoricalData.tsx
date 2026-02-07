@@ -10,11 +10,6 @@ const HistoricalData: React.FC = () => {
   const [timeRange, setTimeRange] = useState('24h');
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchHistoricalData();
-  }, [timeRange]);
-
   const fetchHistoricalData = async () => {
     setLoading(true);
     try {
@@ -30,6 +25,11 @@ const HistoricalData: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchHistoricalData();
+  }, [timeRange]);
 
   return (
     <div className="min-h-screen bg-gray-950">

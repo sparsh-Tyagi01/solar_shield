@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ClockIcon } from '@heroicons/react/24/solid';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
