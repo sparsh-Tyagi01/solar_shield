@@ -27,14 +27,22 @@ port = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
 ### Start Command
 ```bash
 # Render automatically provides $PORT environment variable
-# Use python -m to ensure proper module imports
-python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+# Use startup script for proper module resolution
+bash start_server.sh
 ```
 
-**Why `python -m uvicorn`?**
-- Ensures Python's module system is used
-- Properly resolves `backend` package imports
-- More reliable than calling `uvicorn` directly
+**What the startup script does:**
+- Sets PYTHONPATH to project root
+- Changes to correct working directory  
+- Validates backend directory exists
+- Starts uvicorn with proper environment
+- Provides diagnostic output
+
+### Required Environment Variables
+```bash
+# Critical for module imports
+PYTHONPATH=/opt/render/project/src
+```
 
 ## Quick Deploy to Render
 
@@ -48,17 +56,19 @@ python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
 2. **In Render Dashboard**
    - New → Web Service
    - Connect GitHub repo
-   - Start Command: `python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-   - Add environment variables (see RENDER_DEPLOYMENT.md)
+   - Build Command: `pip install -r requirements.txt && chmod +x start_server.sh`
+   - Start Command: `bash start_server.sh`
+   - Add environment variables (see below)
 
 3. **Deploy**
    - Render will automatically build and deploy
-   - Check logs for: `INFO: Starting server on 0.0.0.0:10000`
+   - Check logs for: `✓ Backend directory found` and `INFO: Starting server on 0.0.0.0:10000`
 
 ## Environment Variables for Production
 
-**Required:**
+**Critical (Required):**
 ```bash
+PYTHONPATH=/opt/render/project/src
 API_HOST=0.0.0.0
 API_DEBUG=False
 ```
@@ -91,18 +101,20 @@ After deployment, check:
 **Fix**: ✅ Already fixed in current code
 
 ### ❌ "ModuleNotFoundError: No module named 'backend'"
-**Cause**: Python can't find the backend package
+**Cause**: Python can't find the backend package due to incorrect PYTHONPATH
 
-**Fix**: ✅ Fixed by using `python -m uvicorn` instead of just `uvicorn`
+**Fix**: ✅ Fixed by using startup script with explicit PYTHONPATH
 
-Ensure your start command is:
-```bash
-python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+**Required configuration:**
+1. Build Command: `pip install -r requirements.txt && chmod +x start_server.sh`
+2. Start Command: `bash start_server.sh`
+3. Environment Variable: `PYTHONPATH=/opt/render/project/src`
+
+**Verify in logs:**
 ```
-
-Alternative: Use the startup script:
-```bash
-bash start_server.sh
+✓ Backend directory found
+Starting uvicorn server...
+INFO: Application startup complete.
 ```
 
 ### ❌ "Module not found" (other packages)

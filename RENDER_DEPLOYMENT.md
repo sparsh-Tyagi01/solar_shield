@@ -20,21 +20,24 @@
    Region: Choose nearest to your users
    Branch: main
    
-   Build Command: pip install -r requirements.txt
-   Start Command: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+   Build Command: pip install -r requirements.txt && chmod +x start_server.sh
+   Start Command: bash start_server.sh
    ```
    
-   > **Important**: Use `python -m uvicorn` (not just `uvicorn`) to ensure proper module imports
+   > **Important**: Use the `start_server.sh` script for proper module imports and environment setup
 
 3. **Set Environment Variables**
    Click "Environment" and add:
    ```
+   PYTHONPATH=/opt/render/project/src
    API_HOST=0.0.0.0
    API_DEBUG=False
    FRONTEND_URL=https://your-frontend-url.com
    N2YO_API_KEY=your-key-here
    ANTHROPIC_API_KEY=your-key-here
    ```
+   
+   > **Critical**: Set `PYTHONPATH=/opt/render/project/src` to ensure Python finds the backend module
 
 4. **Deploy**
    - Click "Create Web Service"
@@ -105,22 +108,29 @@ INFO: Uvicorn running on http://0.0.0.0:10000
 ### Module Not Found Error
 ❌ **Error**: "ModuleNotFoundError: No module named 'backend'"
 
-✅ **Solution**: Fixed by using `python -m uvicorn` instead of just `uvicorn` in the start command.
+✅ **Solution**: Use the `start_server.sh` startup script with proper PYTHONPATH
 
-This ensures Python's module system properly resolves the `backend` package from the project root.
+**Required steps:**
+1. **Build Command**: `pip install -r requirements.txt && chmod +x start_server.sh`
+2. **Start Command**: `bash start_server.sh`
+3. **Environment Variable**: `PYTHONPATH=/opt/render/project/src`
 
-**Verify your start command is:**
-```bash
-python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+The startup script:
+- Sets the correct working directory
+- Configures PYTHONPATH to include project root
+- Provides diagnostic output
+- Handles both python3 and python commands
+
+**Check startup logs for:**
 ```
-
-**Alternative solution** (if still having issues):
-Use the provided startup script:
-```bash
-bash start_server.sh
-```
-INFO: Starting server on 0.0.0.0:10000
-INFO: Uvicorn running on http://0.0.0.0:10000
+======================================
+Starting SolarShield Backend
+======================================
+Working directory: /opt/render/project/src
+Python path: /opt/render/project/src:...
+Port: 10000
+✓ Backend directory found
+Starting uvicorn server...
 ```
 
 ### Build Failures

@@ -16,46 +16,58 @@ When you run `uvicorn` directly (as an installed command), Python's module impor
 
 ## Solution
 
-✅ **Changed start command to use `python -m uvicorn`** instead of just `uvicorn`
+✅ **Use startup script with explicit PYTHONPATH configuration**
+
+### Final Working Configuration
+
+**1. Startup Script (start_server.sh):**
+- Sets working directory to project root
+- Exports PYTHONPATH to include project root
+- Validates backend directory exists
+- Provides diagnostic output
+- Starts uvicorn with proper environment
+
+**2. Render Configuration:**
+- Build Command: `pip install -r requirements.txt && chmod +x start_server.sh`
+- Start Command: `bash start_server.sh`
+- Environment Variable: `PYTHONPATH=/opt/render/project/src`
 
 ### Why This Works
 
-1. **`uvicorn` (direct command)**:
-   - Runs the installed uvicorn binary
-   - Python's module path may not include project root
-   - Results in: `ModuleNotFoundError: No module named 'backend'`
+The combination of startup script + PYTHONPATH environment variable ensures:
 
-2. **`python -m uvicorn` (module execution)**:
-   - Runs uvicorn as a Python module
-   - Current directory is automatically added to `sys.path`
-   - Python's import system properly resolves `backend.main`
-   - Results in: ✅ Successful import
+1. **Explicit Python Path**: PYTHONPATH is set before Python starts
+2. **Working Directory**: Script changes to project root directory
+3. **Validation**: Checks that backend directory exists before starting
+4. **Diagnostic Output**: Provides clear logs for debugging
+5. **Cross-Platform**: Handles both python3 and python commands
 
 ## Files Updated
 
 ### 1. Procfile
 ```diff
 - web: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-+ web: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
++ web: bash start_server.sh
 ```
 
 ### 2. render.yaml
 ```diff
+- buildCommand: "pip install -r requirements.txt"
 - startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
-+ startCommand: "python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
++ buildCommand: "pip install -r requirements.txt && chmod +x start_server.sh"
++ startCommand: "bash start_server.sh"
++ envVars:
++   - key: PYTHONPATH
++     value: /opt/render/project/src
 ```
 
-### 3. start_server.sh (NEW - Alternative)
-Created a bash startup script that:
-- Explicitly sets `PYTHONPATH` to project root
-- Changes to correct working directory
-- Provides debug output
-- Starts the server with proper configuration
-
-Usage:
-```bash
-bash start_server.sh
-```
+### 3. start_server.sh (Enhanced)
+Updated with:
+- Better diagnostic output with formatted headers
+- Backend directory validation
+- Python version detection (python3/python)
+- Error handling with exit codes
+- Clear status messages
 
 ### 4. RENDER_DEPLOYMENT.md (UPDATED)
 Added troubleshooting section explaining the module import fix.
@@ -75,28 +87,52 @@ $ python3 -c "import sys; sys.path.insert(0, '.'); import backend.main"
 ## Next Steps for Render Deployment
 
 1. **Push the changes to GitHub**:
-   ```bash
-   git add Procfile render.yaml start_server.sh
-   git commit -m "Fix: Use python -m uvicorn for proper module imports on Render"
+   ```bash RENDER_DEPLOYMENT.md DEPLOYMENT_QUICK_REFERENCE.md MODULE_IMPORT_FIX.md
+   git commit -m "Fix: Add startup script with PYTHONPATH for Render module imports"
    git push
    ```
 
-2. **Redeploy on Render**:
-   - Render will automatically detect the changes
+2. **Configure Render Dashboard**:
+   - Go to your service settings
+   - Update Environment Variables:
+     - Add: `PYTHONPATH=/opt/render/project/src`
+   - Save changes
+
+3. **Redeploy on Render**:
+   - Render will automatically detect the changes and redeploy
    - Or manually trigger deployment from dashboard
 
-3. **Verify in Render logs**:
-   Look for these lines:
+4. **Verify in Render logs**:
+   Look for these success indicators:
    ```
-   INFO:     Started server process
-   INFO:     Waiting for application startup.
-   INFO:     Application startup complete.
-   INFO:     Uvicorn running on http://0.0.0.0:10000
-   ```
+   ======================================
+   Starting SolarShield Backend
+   ======================================
+   Working directory: /opt/render/project/src
+   Python path: /opt/render/project/src:...
+   Port: 10000
+   ✓ Backend directory found
+   Starting uvicorn server...
+   Manual PYTHONPATH in start command
+```bash
+export PYTHONPATH=/opt/render/project/src && python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+```
 
-4. **Test the deployed API**:
-   ```bash
-   curl https://your-app.onrender.com/
+### Option 2: Install as editable package
+Add `setup.py` to project root:
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="solarsheild-backend",
+    version="1.0.0",
+    packages=find_packages(),
+)
+```
+
+Then update build command:
+```bash
+pip install -r requirements.txt &&    curl https://your-app.onrender.com/
    ```
 
 ## Alternative Solutions (if still having issues)
