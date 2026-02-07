@@ -22,8 +22,9 @@ LOG_DIR.mkdir(exist_ok=True)
 (DATA_DIR / "processed").mkdir(exist_ok=True)
 
 # API Configuration
+# Render.com and other cloud platforms use PORT env variable
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", 8000))
+API_PORT = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
 API_DEBUG = os.getenv("API_DEBUG", "True").lower() == "true"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 

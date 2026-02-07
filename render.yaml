@@ -1,0 +1,31 @@
+services:
+  # Backend API
+  - type: web
+    name: solarsheild-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_DEBUG
+        value: False
+      - key: FRONTEND_URL
+        sync: false
+      - key: N2YO_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    healthCheckPath: /
+
+  # Frontend (Optional - if deploying separately)
+  # - type: web
+  #   name: solarsheild-frontend
+  #   env: static
+  #   buildCommand: "cd frontend && npm install && npm run build"
+  #   staticPublishPath: ./frontend/build
+  #   envVars:
+  #     - key: REACT_APP_API_URL
+  #       value: https://solarsheild-backend.onrender.com
+  #     - key: REACT_APP_WS_URL
+  #       value: wss://solarsheild-backend.onrender.com

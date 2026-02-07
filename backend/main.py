@@ -1358,10 +1358,18 @@ async def chat_with_solar_gpt(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
+    import os
+    
+    # Get port from environment (Render, Heroku, etc. use PORT env var)
+    port = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
+    host = os.getenv("API_HOST", "0.0.0.0")
+    
+    logger.info(f"Starting server on {host}:{port}")
+    
     uvicorn.run(
         "backend.main:app",
-        host=API_HOST,
-        port=API_PORT,
-        reload=True,
+        host=host,
+        port=port,
+        reload=API_DEBUG,
         log_level="info"
     )

@@ -37,8 +37,12 @@ UPDATE_INTERVAL=60
 ```bash
 cd backend
 source ../.venv/bin/activate
-python -m uvicorn main:app --host $API_HOST --port $API_PORT
+python -m backend.main
+# Or for development with auto-reload:
+# uvicorn backend.main:app --reload
 ```
+
+**Note**: The app automatically uses the `PORT` environment variable for cloud deployments (Render, Heroku) or falls back to `API_PORT` for local development.
 
 ## Frontend Configuration
 
