@@ -57,7 +57,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     connect();
 
@@ -69,6 +68,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         wsRef.current.close();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
