@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import LanguageSelector from './LanguageSelector';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -35,7 +36,8 @@ const Navigation: React.FC = () => {
             </div>
           </Link>
           
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-4">
+            <div className="flex space-x-2">
             {links.map((link) => (
               <Link key={link.path} to={link.path}>
                 <motion.div
@@ -61,6 +63,9 @@ const Navigation: React.FC = () => {
                 </motion.div>
               </Link>
             ))}
+            </div>
+            
+            <LanguageSelector />
           </div>
         </div>
       </div>

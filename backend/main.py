@@ -32,6 +32,7 @@ from backend.utils import (
     get_model_improver
 )
 from backend.utils.logger import get_logger
+from backend.chatbot import get_chatbot
 from backend.config import (
     API_HOST,
     API_PORT,
@@ -1253,6 +1254,105 @@ async def get_confidence_summary():
     except Exception as e:
         logger.error(f"Error getting confidence summary: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ================================
+# FEATURE 1: AI CHATBOT SOLAR-GPT
+# ================================
+
+class ChatMessage(BaseModel):
+    """Chat message model"""
+    role: str = Field(..., description="Role: 'user' or 'assistant'")
+    content: str = Field(..., description="Message content")
+
+
+class ChatRequest(BaseModel):
+    """Chatbot request model"""
+    message: str = Field(..., description="User's message")
+    conversation_history: List[ChatMessage] = Field(default=[], description="Previous messages (last 10)")
+
+
+@app.post("/api/chatbot")
+async def chat_with_solar_gpt(request: ChatRequest):
+    """
+    🤖 FEATURE 1: AI CHATBOT SOLAR-GPT
+    
+    Chat with intelligent AI assistant powered by Claude
+    Provides real-time space weather insights with current data context
+    
+    Example:
+        POST /api/chatbot
+        {
+            "message": "What's the current Kp index?",
+            "conversation_history": []
+        }
+    """
+    try:
+        # Get chatbot instance
+        chatbot = get_chatbot()
+        
+        # Fetch real-time data for context
+        try:
+            current_conditions = data_fetcher.fetch_realtime_data() if data_fetcher else {}
+        except:
+            current_conditions = {}
+        
+        # Get predictions
+        try:
+            if current_conditions:
+                storm_pred = await predict_storm(SpaceWeatherData(**current_conditions))
+                severity_pred = await predict_severity(SpaceWeatherData(**current_conditions))
+                predictions = {
+                    'storm_occurrence': storm_pred.dict() if hasattr(storm_pred, 'dict') else storm_pred,
+                    'storm_severity': severity_pred.dict() if hasattr(severity_pred, 'dict') else severity_pred
+                }
+            else:
+                predictions = {}
+        except:
+            predictions = {}
+        
+        # Get satellite status
+        satellites_data = satellite_fleet.copy() if satellite_fleet else []
+        
+        # Build comprehensive data package
+        realtime_data = {
+            'current_conditions': current_conditions,
+            'predictions': predictions,
+            'satellites': satellites_data,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        # Convert conversation history to simple dict format
+        history = [{"role": msg.role, "content": msg.content} for msg in request.conversation_history]
+        
+        # Get AI response
+        response = await chatbot.chat(
+            user_message=request.message,
+            conversation_history=history,
+            realtime_data=realtime_data
+        )
+        
+        logger.info(f"Chatbot responded to: {request.message[:50]}...")
+        
+        return {
+            "success": True,
+            "response": response['response'],
+            "timestamp": response['timestamp'],
+            "confidence": response.get('confidence', 0.9),
+            "tokens_used": response.get('tokens_used', 0),
+            "model": response.get('model', 'claude-3-5-sonnet'),
+            "mode": response.get('mode', 'ai')
+        }
+        
+    except Exception as e:
+        logger.error(f"Chatbot endpoint error: {e}", exc_info=True)
+        return {
+            "success": False,
+            "response": f"⚠️ I encountered an error: {str(e)}\n\nPlease try again or check your API configuration.",
+            "timestamp": datetime.utcnow().isoformat(),
+            "confidence": 0.0,
+            "error": str(e)
+        }
 
 
 if __name__ == "__main__":

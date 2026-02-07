@@ -21,9 +21,11 @@ interface SatelliteData {
 
 interface AffectedRegionsMapProps {
   satellites: SatelliteData[];
+  kpIndex?: number;
+  stormSeverity?: number;
 }
 
-const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) => {
+const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites, kpIndex = 3, stormSeverity = 0 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoveredSatellite, setHoveredSatellite] = React.useState<AffectedRegion | null>(null);
   const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
@@ -203,6 +205,68 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
     // Antarctica
     ctx.fillStyle = 'rgba(200, 220, 240, 0.3)';
     ctx.fillRect(0, height * 0.85, width, height * 0.15);
+
+    // Draw major cities as reference points
+    const cities = [
+      { name: 'New York', lat: 40.7, lon: -74 },
+      { name: 'London', lat: 51.5, lon: -0.1 },
+      { name: 'Tokyo', lat: 35.7, lon: 139.7 },
+      { name: 'Sydney', lat: -33.9, lon: 151.2 },
+      { name: 'Moscow', lat: 55.8, lon: 37.6 },
+      { name: 'Beijing', lat: 39.9, lon: 116.4 },
+      { name: 'Los Angeles', lat: 34.1, lon: -118.2 },
+      { name: 'São Paulo', lat: -23.5, lon: -46.6 },
+      { name: 'Mumbai', lat: 19.1, lon: 72.9 },
+      { name: 'Dubai', lat: 25.3, lon: 55.3 },
+    ];
+
+    cities.forEach(city => {
+      const x = ((city.lon + 180) / 360) * width;
+      const y = ((90 - city.lat) / 180) * height;
+      
+      // Draw city marker
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw city name
+      ctx.font = 'bold 9px Arial';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.fillText(city.name, x + 5, y - 3);
+    });
+
+    // Draw aurora zones based on Kp index
+    // Higher Kp = aurora visible at lower latitudes
+    const auroraLatitude = Math.max(50, 70 - (kpIndex * 3));
+    
+    // Northern aurora zone
+    const northAuroraGradient = ctx.createLinearGradient(0, 0, 0, height * 0.25);
+    northAuroraGradient.addColorStop(0, `rgba(0, 255, 150, ${0.1 + kpIndex * 0.05})`);
+    northAuroraGradient.addColorStop(1, 'rgba(0, 255, 150, 0)');
+    
+    ctx.fillStyle = northAuroraGradient;
+    const northY = ((90 - auroraLatitude) / 180) * height;
+    ctx.fillRect(0, 0, width, northY);
+    
+    // Southern aurora zone
+    const southAuroraGradient = ctx.createLinearGradient(0, height * 0.75, 0, height);
+    southAuroraGradient.addColorStop(0, 'rgba(0, 255, 150, 0)');
+    southAuroraGradient.addColorStop(1, `rgba(0, 255, 150, ${0.1 + kpIndex * 0.05})`);
+    
+    ctx.fillStyle = southAuroraGradient;
+    const southY = ((90 + auroraLatitude) / 180) * height;
+    ctx.fillRect(0, southY, width, height - southY);
+    
+    // Draw aurora zone labels
+    if (kpIndex >= 5) {
+      ctx.font = 'bold 12px Arial';
+      ctx.fillStyle = 'rgba(0, 255, 150, 0.8)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.strokeText('AURORA ZONE', width / 2 - 50, northY + 15);
+      ctx.fillText('AURORA ZONE', width / 2 - 50, northY + 15);
+    }
 
     // Draw affected regions
     const regions = calculateAffectedRegions();
@@ -452,21 +516,14 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg p-6 shadow-lg border-2 border-gray-200"
+      className="rounded-lg"
     >
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Global Coverage Map - Affected Regions
-      </h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Real-time satellite coverage and health status visualization
-      </p>
-      
       {satellites.length === 0 ? (
-        <div className="w-full h-96 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-300">
+        <div className="w-full h-96 flex items-center justify-center bg-space-300/30 rounded-lg radar-grid">
           <div className="text-center">
             <div className="text-4xl mb-2">🛰️</div>
-            <div className="text-gray-700">Waiting for satellite data...</div>
-            <div className="text-xs text-gray-600 mt-2">Data will appear once satellites are tracked</div>
+            <div className="data-value text-xl">Waiting for satellite data...</div>
+            <div className="text-xs text-space-50 mt-2 font-mono">Data will appear once satellites are tracked</div>
           </div>
         </div>
       ) : (
@@ -476,7 +533,7 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
               ref={canvasRef}
               width={1200}
               height={600}
-              className="w-full h-full rounded-lg border-2 border-gray-300 shadow-lg cursor-crosshair"
+              className="w-full h-full rounded-lg border border-cyber-cyan/30 shadow-xl cursor-crosshair"
               style={{ imageRendering: 'auto' }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
@@ -485,51 +542,91 @@ const AffectedRegionsMap: React.FC<AffectedRegionsMapProps> = ({ satellites }) =
             {/* Tooltip for hovered satellite */}
             {hoveredSatellite && (
               <div
-                className="absolute bg-white border-2 border-gray-300 rounded-lg p-3 shadow-xl pointer-events-none z-10"
+                className="absolute mission-panel p-3 shadow-xl pointer-events-none z-10 border-cyber-cyan"
                 style={{
                   left: `${mousePos.x + 15}px`,
                   top: `${mousePos.y + 15}px`,
                 }}
               >
-                <div className="text-sm font-bold text-gray-800 mb-1">
+                <div className="text-sm font-bold text-cyber-cyan mb-2">
                   {hoveredSatellite.satelliteName}
                 </div>
-                <div className="text-xs text-gray-700 space-y-1">
-                  <div>Type: <span className="text-blue-600 font-semibold">{hoveredSatellite.type}</span></div>
-                  <div>Health: <span className={
-                    hoveredSatellite.health > 80 ? 'text-green-600 font-semibold' :
-                    hoveredSatellite.health > 50 ? 'text-yellow-600 font-semibold' :
-                    'text-red-600 font-semibold'
+                <div className="text-xs text-space-50 space-y-1 font-mono">
+                  <div>TYPE: <span className="text-cyber-cyan-bright font-semibold">{hoveredSatellite.type}</span></div>
+                  <div>HEALTH: <span className={
+                    hoveredSatellite.health > 80 ? 'text-cyber-green font-semibold' :
+                    hoveredSatellite.health > 50 ? 'text-solar-400 font-semibold' :
+                    'text-cyber-red font-semibold'
                   }>{hoveredSatellite.health.toFixed(1)}%</span></div>
-                  <div>Position: <span className="text-blue-600 font-semibold">
-                    {hoveredSatellite.lat.toFixed(2)}°, {hoveredSatellite.lon.toFixed(2)}°
+                  <div>LAT/LON: <span className="text-cyber-cyan-bright font-semibold">
+                    {hoveredSatellite.lat.toFixed(2)}° / {hoveredSatellite.lon.toFixed(2)}°
                   </span></div>
-                  <div>Coverage: <span className="text-red-600 font-semibold">{(hoveredSatellite.radius * 100).toFixed(0)} km</span></div>
+                  <div>COVERAGE: <span className="text-cyber-cyan-bright font-semibold">{(hoveredSatellite.radius * 100).toFixed(0)} km</span></div>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-700">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
             {satellites.map((sat) => (
-              <div key={sat.id} className="flex items-center space-x-2">
+              <div key={sat.id} className="flex items-center space-x-2 mission-panel px-2 py-1.5">
                 <div 
-                  className={`w-2 h-2 rounded-full ${
-                    sat.health > 80 ? 'bg-blue-600' :
-                    sat.health > 50 ? 'bg-orange-600' :
-                    'bg-red-600'
+                  className={`w-2 h-2 rounded-full animate-pulse ${
+                    sat.health > 80 ? 'bg-cyber-green' :
+                    sat.health > 50 ? 'bg-solar-400' :
+                    'bg-cyber-red'
                   }`}
                 />
-                <span className="truncate font-medium">{sat.name}</span>
-                <span className={`ml-auto font-semibold ${
-                  sat.health > 80 ? 'text-green-600' :
-                  sat.health > 50 ? 'text-yellow-700' :
-                  'text-red-600'
+                <span className="truncate font-mono text-space-50">{sat.name}</span>
+                <span className={`ml-auto font-mono font-semibold ${
+                  sat.health > 80 ? 'text-cyber-green' :
+                  sat.health > 50 ? 'text-solar-400' :
+                  'text-cyber-red'
                 }`}>
                   {sat.health.toFixed(0)}%
                 </span>
               </div>
             ))}
+          </div>
+
+          {/* Map Legend */}
+          <div className="mt-4 mission-panel p-4">
+            <h3 className="text-sm font-display font-bold text-cyber-cyan uppercase tracking-wider mb-3">
+              Map Legend
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full bg-cyber-green opacity-50"></div>
+                <span className="text-space-50">Healthy Satellite</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full bg-solar-400 opacity-50"></div>
+                <span className="text-space-50">Degraded Satellite</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full bg-cyber-red opacity-50"></div>
+                <span className="text-space-50">Critical Satellite</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-gradient-to-b from-green-400 to-transparent opacity-50"></div>
+                <span className="text-space-50">Aurora Zone</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full bg-white opacity-40"></div>
+                <span className="text-space-50">Major Cities</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full border-2 border-cyber-cyan opacity-50"></div>
+                <span className="text-space-50">Coverage Area</span>
+              </div>
+            </div>
+            {kpIndex >= 5 && (
+              <div className="mt-3 pt-3 border-t border-cyber-cyan/20">
+                <p className="text-xs text-cyber-cyan font-mono">
+                  ⚠️ HIGH GEOMAGNETIC ACTIVITY • Kp Index: {kpIndex.toFixed(1)} • Aurora visible at lower latitudes
+                </p>
+              </div>
+            )}
           </div>
         </>
       )}

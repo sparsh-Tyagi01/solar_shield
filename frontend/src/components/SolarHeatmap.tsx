@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 interface HeatmapProps {
   data?: {
@@ -20,7 +21,81 @@ const SolarHeatmap: React.FC<HeatmapProps> = ({
   colorScheme = 'solar',
   showLegend = true 
 }) => {
-  // Default data if none provided - simulating 24h x 7days of solar activity
+  const [realTimeData, setRealTimeData] = useState<any>(null);
+
+  useEffect(() => {
+    // Fetch real historical data from API
+    const fetchHistoricalData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/historical/7d');
+        const historicalData = response.data;
+        
+        // Transform historical data into heatmap format
+        // Group data by day and hour
+        const dayHourMap: { [key: string]: { [key: string]: number[] } } = {};
+        
+        historicalData.forEach((item: any) => {
+          const timestamp = new Date(item.timestamp);
+          const dayOfWeek = timestamp.getDay(); // 0-6 (Sunday-Saturday)
+          const hour = timestamp.getHours(); // 0-23
+          
+          if (!dayHourMap[dayOfWeek]) {
+            dayHourMap[dayOfWeek] = {};
+          }
+          if (!dayHourMap[dayOfWeek][hour]) {
+            dayHourMap[dayOfWeek][hour] = [];
+          }
+          
+          // Calculate solar activity intensity (0-100) based on space weather parameters
+          const bzIntensity = Math.abs(item.bz) * 5; // Normalize Bz
+          const speedIntensity = ((item.speed - 300) / 5); // Normalize speed
+          const densityIntensity = (item.density * 3); // Normalize density
+          const intensity = Math.min(100, Math.max(0, bzIntensity + speedIntensity + densityIntensity));
+          
+          dayHourMap[dayOfWeek][hour].push(intensity);
+        });
+        
+        // Create 7x24 matrix (7 days x 24 hours)
+        const intensity: number[][] = [];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        for (let day = 0; day < 7; day++) {
+          const row: number[] = [];
+          for (let hour = 0; hour < 24; hour++) {
+            if (dayHourMap[day] && dayHourMap[day][hour] && dayHourMap[day][hour].length > 0) {
+              // Average all values for this day-hour combination
+              const avg = dayHourMap[day][hour].reduce((a, b) => a + b, 0) / dayHourMap[day][hour].length;
+              row.push(avg);
+            } else {
+              // No data for this slot
+              row.push(0);
+            }
+          }
+          intensity.push(row);
+        }
+        
+        setRealTimeData({
+          intensity,
+          labels: {
+            x: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+            y: dayNames
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching historical data for heatmap:', error);
+        // Will fall back to default data
+      }
+    };
+
+    fetchHistoricalData();
+    
+    // Update every 10 minutes
+    const interval = setInterval(fetchHistoricalData, 600000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Default data if none provided and no real data fetched
   const defaultData = useMemo(() => {
     const intensity: number[][] = [];
     for (let i = 0; i < 7; i++) {
@@ -43,7 +118,8 @@ const SolarHeatmap: React.FC<HeatmapProps> = ({
     };
   }, []);
 
-  const heatmapData = data || defaultData;
+  // Use real-time data if available, otherwise use provided data, otherwise use default
+  const heatmapData = realTimeData || data || defaultData;
 
   // Color schemes for different types of solar data
   const getColorForValue = (value: number): string => {
@@ -95,51 +171,49 @@ const SolarHeatmap: React.FC<HeatmapProps> = ({
     <div className="w-full">
       <div className="mb-4">
         <h3 className="text-xl font-display font-semibold text-white mb-2">{title}</h3>
-        <p className="text-sm text-slate-400">Real-time solar activity intensity map</p>
+        <p className="text-sm text-slate-400">Real-time solar activity intensity (last 7 days)</p>
       </div>
 
-      <div className="glass-effect rounded-xl p-6 hover-lift">
+      <div className="glass-effect rounded-xl p-4 hover-lift">
         {/* Heatmap Grid */}
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full">
             {/* X-axis labels (top) */}
             <div className="flex mb-2">
-              <div className="w-16"></div>
-              {heatmapData.labels?.x.map((label, i) => (
-                <div key={i} className="flex-1 min-w-[40px] text-center">
+              <div className="w-12"></div>
+              {heatmapData.labels?.x.map((label: string, i: number) => (
+                <div key={i} className="flex-1 min-w-[30px] text-center">
                   <span className="text-xs text-slate-400 font-medium">
-                    {i % 3 === 0 ? label : ''}
+                    {i % 4 === 0 ? label : ''}
                   </span>
                 </div>
               ))}
             </div>
             
             {/* Heatmap rows */}
-            {heatmapData.intensity.map((row, rowIndex) => (
+            {heatmapData.intensity.map((row: number[], rowIndex: number) => (
               <div key={rowIndex} className="flex items-center mb-1">
-                {/* Y-axis label */}
-                <div className="w-16 pr-2 text-right">
+
+                <div className="w-12 pr-2 text-right">
                   <span className="text-sm text-slate-300 font-medium">
                     {heatmapData.labels?.y[rowIndex]}
                   </span>
                 </div>
-                
-                {/* Heatmap cells */}
-                {row.map((value, colIndex) => (
+                {row.map((value: number, colIndex: number) => (
                   <motion.div
                     key={`${rowIndex}-${colIndex}`}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ 
-                      delay: (rowIndex * row.length + colIndex) * 0.002,
+                      delay: (rowIndex * row.length + colIndex) * 0.001,
                       duration: 0.3 
                     }}
                     whileHover={{ 
-                      scale: 1.15, 
+                      scale: 1.2, 
                       zIndex: 10,
                       transition: { duration: 0.2 }
                     }}
-                    className="flex-1 min-w-[40px] aspect-square relative group cursor-pointer"
+                    className="flex-1 min-w-[30px] aspect-square relative group cursor-pointer"
                   >
                     <div 
                       className="w-full h-full rounded-sm transition-all duration-200"

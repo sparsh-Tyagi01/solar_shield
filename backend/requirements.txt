@@ -31,3 +31,6 @@ loguru
 
 # Environment variables
 python-dotenv
+
+# AI/Chatbot
+anthropic  # Claude AI integration for SOLAR-GPT chatbot

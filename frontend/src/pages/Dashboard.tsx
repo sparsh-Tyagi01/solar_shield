@@ -7,6 +7,12 @@ import SatelliteFleetGrid from '../components/SatelliteFleetGrid';
 import ScientificGraphs from '../components/ScientificGraphs';
 import AlertSystem from '../components/AlertSystem';
 import SolarHeatmap from '../components/SolarHeatmap';
+import AffectedRegionsMap from '../components/AffectedRegionsMap';
+import SolarGPTChatbot from '../components/SolarGPTChatbot';
+import VoiceAlertSystem from '../components/VoiceAlertSystem';
+import EmergencyProtocols from '../components/EmergencyProtocols';
+import ConfidenceMeter from '../components/ConfidenceMeter';
+import LaunchWindowAdvisor from '../components/LaunchWindowAdvisor';
 import { useWebSocket } from '../context/WebSocketContext';
 import axios from 'axios';
 
@@ -94,6 +100,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Helper function to calculate ISS risk level
+  const getISSRiskLevel = (): 'low' | 'medium' | 'high' | 'critical' => {
+    const iss = satellites.find(sat => sat.name === 'ISS' || sat.id === 'ISS');
+    if (!iss) return 'low';
+    
+    const health = iss.health;
+    const kp = currentData?.kp_index || 0;
+    
+    // Risk based on health and Kp index
+    if (health < 60 || kp >= 7) return 'critical';
+    if (health < 75 || kp >= 5) return 'high';
+    if (health < 85 || kp >= 4) return 'medium';
+    return 'low';
+  };
+
+  // Helper function to calculate average satellite health
+  const getAverageSatelliteHealth = (): number => {
+    if (satellites.length === 0) return 100;
+    const totalHealth = satellites.reduce((sum, sat) => sum + sat.health, 0);
+    return totalHealth / satellites.length;
+  };
+
   const handleSatelliteUpdate = (updatedSatellites: any[]) => {
     console.log('📡 Dashboard: Received satellite update');
     console.log('📡 Count received:', updatedSatellites.length);
@@ -121,7 +149,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-display font-black text-cyber-cyan uppercase tracking-wider mb-1">
-                SOLARGUARD 3D
+                SOLARSHIELD
               </h1>
               <p className="text-sm text-space-50 font-mono uppercase tracking-widest">
                 Mission Control • Real-Time Monitoring
@@ -158,8 +186,8 @@ const Dashboard: React.FC = () => {
 
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-          {/* Left Panel - 3D Earth & Controls */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Left Panel - 3D Earth & Controls - Wider */}
+          <div className="lg:col-span-8 space-y-6">
             {/* 3D Visualization */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -223,8 +251,8 @@ const Dashboard: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* Right Panel - Data & Metrics */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* Right Panel - Data & Metrics - Narrower */}
+          <div className="lg:col-span-4 space-y-6">
             {/* Solar Activity Heatmap */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -254,7 +282,81 @@ const Dashboard: React.FC = () => {
             />
           </motion.div>
         )}
+
+        {/* Affected Regions Map */}
+        {satellites.length > 0 && backendConnected && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <div className="mission-panel p-6">
+              <div className="mb-4">
+                <h2 className="text-2xl font-display font-bold text-cyber-cyan uppercase tracking-wider mb-2">
+                  Global Impact Zones
+                </h2>
+                <p className="text-sm text-space-50 font-mono">
+                  Real-time satellite coverage • Aurora zones • Affected geographic regions
+                </p>
+              </div>
+              <AffectedRegionsMap 
+                satellites={satellites}
+                kpIndex={currentData?.kp_index || 3}
+                stormSeverity={predictions?.severity || 0}
+              />
+            </div>
+          </motion.div>
+        )}
       </div>
+
+      {/* AI Confidence Meter */}
+      {predictions && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-6"
+        >
+          <ConfidenceMeter
+            confidence={predictions.confidence || 87}
+            currentData={currentData}
+            predictions={predictions}
+          />
+        </motion.div>
+      )}
+
+      {/* Launch Window Advisor */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mb-6"
+      >
+        <LaunchWindowAdvisor
+          currentData={currentData}
+          predictions={predictions}
+        />
+      </motion.div>
+
+      {/* AI Chatbot - SOLAR-GPT */}
+      <SolarGPTChatbot />
+
+      {/* Voice Alert System - Always visible */}
+      <VoiceAlertSystem
+        kpIndex={currentData?.kp_index || 0}
+        imfBz={currentData?.bz || 0}
+        stormProbability={predictions?.probability || 0}
+        issRiskLevel={getISSRiskLevel()}
+      />
+
+      {/* Emergency Protocols - Always visible */}
+      <EmergencyProtocols
+        kpIndex={currentData?.kp_index || 0}
+        stormProbability={predictions?.probability || 0}
+        imfBz={currentData?.bz || 0}
+        satelliteHealth={getAverageSatelliteHealth()}
+      />
     </div>
   );
 };
