@@ -10,6 +10,7 @@ const HistoricalData: React.FC = () => {
   const [timeRange, setTimeRange] = useState('24h');
   const [loading, setLoading] = useState(true);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchHistoricalData();
   }, [timeRange]);

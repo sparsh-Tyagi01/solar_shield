@@ -22,15 +22,13 @@ interface SatelliteData {
 const Dashboard: React.FC = () => {
   const [currentData, setCurrentData] = useState<any>(null);
   const [predictions, setPredictions] = useState<any>(null);
-  const [impactData, setImpactData] = useState<any>(null);
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
   const [radiationLevel, setRadiationLevel] = useState(0);
   const [magneticFieldStrength, setMagneticFieldStrength] = useState(1.0);
   const [backendConnected, setBackendConnected] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
   const { messages } = useWebSocket();
 
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchCurrentData();
     const interval = setInterval(fetchCurrentData, 60000);
@@ -47,7 +45,6 @@ const Dashboard: React.FC = () => {
       if (latest.predictions) {
         console.log('Dashboard: Predictions received', latest.predictions);
         setPredictions(latest.predictions.storm_occurrence);
-        setImpactData(latest.predictions.impacts);
       }
       
       // Update satellites from WebSocket if provided
@@ -83,28 +80,17 @@ const Dashboard: React.FC = () => {
 
   const fetchCurrentData = async () => {
     try {
-      const [dataRes, predRes, impactRes] = await Promise.all([
+      const [dataRes, predRes] = await Promise.all([
         axios.get('http://localhost:8000/api/current-conditions'),
-        axios.get('http://localhost:8000/api/predict/storm'),
-        axios.post('http://localhost:8000/predict/impact', {
-          bz: currentData?.bz || -5,
-          speed: currentData?.speed || 450,
-          density: currentData?.density || 8,
-          pressure: currentData?.pressure || 2.5,
-          xray_flux: currentData?.xray_flux || 1e-5,
-          proton_flux: currentData?.proton_flux || 10
-        }).catch(() => null)
+        axios.get('http://localhost:8000/api/predict/storm')
       ]);
       
       setCurrentData(dataRes.data);
       setPredictions(predRes.data);
-      if (impactRes) setImpactData(impactRes.data);
       setBackendConnected(true);
-      setConnectionError(null);
     } catch (error) {
       console.error('Error fetching data:', error);
       setBackendConnected(false);
-      setConnectionError('Backend server not responding. Please start the server.');
     }
   };
 
@@ -114,20 +100,6 @@ const Dashboard: React.FC = () => {
     console.log('📡 Satellite names received:', updatedSatellites.map((s: any) => s.name));
     setSatellites(updatedSatellites);
     console.log('📡 Dashboard state updated with', updatedSatellites.length, 'satellites');
-  };
-
-  // Fleet status calculations
-  const fleetStats = {
-    total: satellites.length,
-    healthy: satellites.filter(s => s.health > 80).length,
-    degraded: satellites.filter(s => s.health > 50 && s.health <= 80).length,
-    critical: satellites.filter(s => s.health <= 50).length,
-    avgHealth: satellites.length > 0 
-      ? (satellites.reduce((sum, s) => sum + s.health, 0) / satellites.length).toFixed(1)
-      : 100,
-    avgDegradation: satellites.length > 0
-      ? (satellites.reduce((sum, s) => sum + s.degradation, 0) / satellites.length).toFixed(1)
-      : 0
   };
 
   return (

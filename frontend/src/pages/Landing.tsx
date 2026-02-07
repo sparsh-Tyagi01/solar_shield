@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Sun, 
   Satellite, 
   Shield, 
   AlertTriangle, 
@@ -12,8 +11,6 @@ import {
   TrendingUp,
   Database,
   MapPin,
-  Play,
-  Sparkles,
   Clock
 } from 'lucide-react';
 
