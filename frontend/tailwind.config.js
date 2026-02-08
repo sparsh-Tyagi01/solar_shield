@@ -31,6 +31,8 @@ module.exports = {
           green: '#00ff88',
           'green-neon': '#00ff41',
         },
+        'cyber-green': '#00ff88',
+        'cyber-red': '#ff4444',
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',

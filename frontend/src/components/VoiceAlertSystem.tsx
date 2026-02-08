@@ -226,8 +226,8 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
     switch (severity) {
       case 'critical': return 'text-red-500';
       case 'danger': return 'text-orange-500';
-      case 'warning': return 'text-yellow-500';
-      default: return 'text-cyan-500';
+      case 'warning': return 'text-yellow-400';
+      default: return 'text-cyan-400';
     }
   };
 
@@ -245,36 +245,71 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
       {/* Floating Control Button */}
       <motion.button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${
+        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white group relative ${
           isSpeaking 
-            ? 'bg-gradient-to-r from-red-600 to-orange-600 animate-pulse' 
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse shadow-cyan-500/50' 
             : isEnabled
-            ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-pink-500/50'
-            : 'bg-gray-700 hover:bg-gray-600'
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:shadow-cyan-500/50'
+            : 'bg-slate-700 hover:bg-slate-600 hover:shadow-slate-500/50'
         }`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        title="Voice Alert System"
+        title="Space Weather Alert System"
       >
         {isSpeaking ? (
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 1 }}
+            className="relative w-6 h-6"
           >
-            🔊
+            {/* Animated sound waves */}
+            <svg className="w-6 h-6 absolute inset-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9z" />
+              <path d="M9 16v-1a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
+            </svg>
+            {/* Pulsing rings */}
+            <motion.div className="absolute inset-0 border-2 border-white rounded-full" animate={{ scale: [1, 1.5], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} />
           </motion.div>
         ) : (
-          <span className="text-2xl">{isEnabled ? '🔔' : '🔕'}</span>
+          <div className="relative w-6 h-6">
+            {isEnabled ? (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+                {/* Satellite icon */}
+                <g>
+                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                  {/* Solar panels */}
+                  <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                  <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                  {/* Antenna */}
+                  <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+                  {/* Signal rings */}
+                  <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+                  <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                </g>
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5" opacity="0.5">
+                <g>
+                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                  <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.5" />
+                  <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.5" />
+                  <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+                  <circle cx="12" cy="2" r="1.5" fill="currentColor" opacity="0.5" />
+                </g>
+              </svg>
+            )}
+          </div>
         )}
         
         {/* Speaking indicator */}
         {isSpeaking && (
-          <div className="absolute inset-0 rounded-full border-4 border-white animate-ping opacity-75"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-cyan-400 animate-ping opacity-75"></div>
         )}
         
         {/* Alert count badge */}
         {alertHistory.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
             {alertHistory.length > 9 ? '9+' : alertHistory.length}
           </span>
         )}
@@ -288,22 +323,32 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -400 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-40 left-6 z-40 w-[450px] max-h-[calc(100vh-200px)] bg-gray-900 rounded-2xl shadow-2xl border border-purple-500/30 overflow-hidden flex flex-col"
+            className="fixed top-40 left-6 z-40 w-[450px] max-h-[calc(100vh-200px)] glass-effect rounded-2xl shadow-2xl shadow-cyan-500/10 border border-cyan-400/20 overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border-b border-cyan-400/20 p-6 flex items-center justify-between backdrop-blur-sm">
               <div className="flex items-center space-x-3">
-                <span className="text-3xl">🔔</span>
+                <svg className="w-6 h-6 text-cyan-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+                  <g>
+                    <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                    <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                    <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                    <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                  </g>
+                </svg>
                 <div>
-                  <h3 className="font-bold text-white text-lg">Voice Alert System</h3>
-                  <p className="text-xs text-purple-100">Automated space weather notifications</p>
+                  <h3 className="font-display font-bold text-white text-lg">Space Weather Alerts</h3>
+                  <p className="text-xs text-cyan-300 font-mono uppercase tracking-widest">Real-time monitoring system</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsPanelOpen(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-cyan-400/10 rounded-lg transition-colors text-cyan-400"
               >
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -312,13 +357,13 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* Enable/Disable Toggle */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20">
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-semibold text-white">Voice Alerts</label>
+                  <label className="text-sm font-semibold text-white font-display uppercase tracking-wider">Voice Alerts</label>
                   <button
                     onClick={() => setIsEnabled(!isEnabled)}
                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                      isEnabled ? 'bg-purple-600' : 'bg-gray-600'
+                      isEnabled ? 'bg-gradient-to-r from-cyan-500 to-blue-600' : 'bg-slate-600'
                     }`}
                   >
                     <motion.div
@@ -328,15 +373,15 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     />
                   </button>
                 </div>
-                <p className="text-xs text-gray-400">
-                  {isEnabled ? 'Alerts will be spoken automatically' : 'Voice alerts disabled'}
+                <p className="text-xs text-slate-400 font-mono">
+                  {isEnabled ? '✓ Alerts will be spoken automatically' : '○ Voice alerts disabled'}
                 </p>
               </div>
 
               {/* Volume Control */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20">
-                <label className="text-sm font-semibold text-white mb-2 block">
-                  Volume: {Math.round(volume * 100)}%
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm">
+                <label className="text-sm font-semibold text-white mb-3 block font-display uppercase tracking-wider">
+                  Volume: <span className="text-cyan-400">{Math.round(volume * 100)}%</span>
                 </label>
                 <input
                   type="range"
@@ -345,17 +390,17 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                   step="0.1"
                   value={volume}
                   onChange={(e) => setVolume(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
                 />
               </div>
 
               {/* Voice Selection */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20">
-                <label className="text-sm font-semibold text-white mb-2 block">Voice</label>
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm">
+                <label className="text-sm font-semibold text-white mb-3 block font-display uppercase tracking-wider">Voice Selection</label>
                 <select
                   value={selectedVoice}
                   onChange={(e) => setSelectedVoice(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                  className="w-full px-3 py-2 bg-slate-800/50 border border-cyan-400/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono"
                 >
                   {availableVoices.map((voice) => (
                     <option key={voice.name} value={voice.name}>
@@ -366,11 +411,11 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
               </div>
 
               {/* Threshold Settings */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20 space-y-3">
-                <h4 className="text-sm font-semibold text-white mb-3">Alert Thresholds</h4>
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm space-y-3">
+                <h4 className="text-sm font-semibold text-white mb-4 font-display uppercase tracking-wider">Alert Thresholds</h4>
                 
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Kp Warning Level</label>
+                  <label className="text-xs text-cyan-300 block mb-2 font-mono uppercase">Kp Warning Level</label>
                   <input
                     type="number"
                     min="0"
@@ -378,12 +423,12 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     step="0.5"
                     value={thresholds.kpWarning}
                     onChange={(e) => setThresholds({ ...thresholds, kpWarning: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-cyan-400/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Kp Danger Level</label>
+                  <label className="text-xs text-cyan-300 block mb-2 font-mono uppercase">Kp Danger Level</label>
                   <input
                     type="number"
                     min="0"
@@ -391,12 +436,12 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     step="0.5"
                     value={thresholds.kpDanger}
                     onChange={(e) => setThresholds({ ...thresholds, kpDanger: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-cyan-400/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">IMF Bz Threshold (nT)</label>
+                  <label className="text-xs text-cyan-300 block mb-2 font-mono uppercase">IMF Bz Threshold (nT)</label>
                   <input
                     type="number"
                     min="-50"
@@ -404,12 +449,12 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     step="1"
                     value={thresholds.bzThreshold}
                     onChange={(e) => setThresholds({ ...thresholds, bzThreshold: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-cyan-400/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">Storm Probability (%)</label>
+                  <label className="text-xs text-cyan-300 block mb-2 font-mono uppercase">Storm Probability (%)</label>
                   <input
                     type="number"
                     min="0"
@@ -417,7 +462,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     step="5"
                     value={thresholds.stormProbability}
                     onChange={(e) => setThresholds({ ...thresholds, stormProbability: parseFloat(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-cyan-400/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono"
                   />
                 </div>
               </div>
@@ -427,14 +472,14 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                 <button
                   onClick={testAlert}
                   disabled={isSpeaking}
-                  className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 rounded-lg text-white text-sm font-display font-bold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-cyan-500/50"
                 >
                   🎤 Test Alert
                 </button>
                 {isSpeaking && (
                   <button
                     onClick={stopSpeaking}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white text-sm font-semibold transition-colors"
+                    className="px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 rounded-lg text-white text-sm font-display font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-red-500/50"
                   >
                     🛑 Stop
                   </button>
@@ -442,13 +487,13 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
               </div>
 
               {/* Alert History */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-white">Alert History</h4>
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-display font-semibold text-white uppercase tracking-wider">Alert History</h4>
                   {alertHistory.length > 0 && (
                     <button
                       onClick={clearHistory}
-                      className="text-xs text-gray-400 hover:text-white transition-colors"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-mono uppercase"
                     >
                       Clear
                     </button>
@@ -457,27 +502,27 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
 
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {alertHistory.length === 0 ? (
-                    <p className="text-xs text-gray-500 text-center py-4">No alerts yet</p>
+                    <p className="text-xs text-slate-500 text-center py-4 font-mono">No alerts yet</p>
                   ) : (
                     alertHistory.map((alert) => (
                       <motion.div
                         key={alert.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-gray-900 rounded-lg p-3 border border-gray-700"
+                        className="bg-slate-800/30 rounded-lg p-3 border border-cyan-400/10"
                       >
                         <div className="flex items-start space-x-2">
                           <span className="text-lg">{getSeverityIcon(alert.severity)}</span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <span className={`text-xs font-semibold uppercase ${getSeverityColor(alert.severity)}`}>
+                              <span className={`text-xs font-display font-semibold uppercase tracking-wider ${getSeverityColor(alert.severity)}`}>
                                 {alert.type.replace(/_/g, ' ')}
                               </span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-slate-500 font-mono">
                                 {alert.timestamp.toLocaleTimeString()}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-300 leading-relaxed">{alert.message}</p>
+                            <p className="text-xs text-slate-300 leading-relaxed">{alert.message}</p>
                           </div>
                         </div>
                       </motion.div>
@@ -487,15 +532,15 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
               </div>
 
               {/* Cooldown Status */}
-              <div className="bg-gray-800 rounded-xl p-4 border border-purple-500/20">
-                <h4 className="text-sm font-semibold text-white mb-3">Cooldown Status</h4>
-                <div className="space-y-2 text-xs">
+              <div className="glass-effect rounded-xl p-4 border border-cyan-400/20 backdrop-blur-sm">
+                <h4 className="text-sm font-display font-semibold text-white mb-4 uppercase tracking-wider">Alert Cooldown</h4>
+                <div className="space-y-2 text-xs font-mono">
                   {['kp_warning', 'kp_danger', 'bz_alert', 'storm_probability', 'iss_risk'].map(type => {
                     const cooldown = getRemainingCooldown(type);
                     const isActive = cooldown !== '0s';
                     return (
-                      <div key={type} className="flex items-center justify-between">
-                        <span className="text-gray-400">{type.replace(/_/g, ' ')}</span>
+                      <div key={type} className="flex items-center justify-between px-2 py-1 rounded bg-slate-800/30 border border-cyan-400/10">
+                        <span className="text-slate-400 uppercase">{type.replace(/_/g, ' ')}</span>
                         <span className={`font-mono ${isActive ? 'text-orange-500' : 'text-green-500'}`}>
                           {isActive ? `🔒 ${cooldown}` : '✅ Ready'}
                         </span>
@@ -503,8 +548,8 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                     );
                   })}
                 </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  Each alert type has a 5-minute cooldown to prevent spam
+                <p className="text-xs text-slate-500 mt-4 font-mono italic">
+                  Each alert type has a 5-minute cooldown to prevent notification spam
                 </p>
               </div>
             </div>
