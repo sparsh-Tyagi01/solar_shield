@@ -13,6 +13,11 @@ const languages = [
 const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Debug: Log languages array
+  useEffect(() => {
+    console.log('🌍 Available languages:', languages.map(l => l.name));
+  }, []);
   const [showWelcome, setShowWelcome] = useState(false);
 
   // Auto-detect and show welcome popup on first visit
@@ -88,28 +93,31 @@ const LanguageSelector: React.FC = () => {
                 className="absolute right-0 mt-2 w-56 bg-gray-900 border border-cyan-500/30 rounded-lg shadow-2xl z-50 overflow-hidden"
               >
                 <div className="p-2 space-y-1">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => changeLanguage(lang.code)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                        lang.code === currentLanguage.code
-                          ? 'bg-cyan-600 text-white'
-                          : 'hover:bg-gray-800 text-gray-300'
-                      }`}
-                    >
-                      <span className="text-2xl">{lang.flag}</span>
-                      <div className="flex-1 text-left">
-                        <div className="font-semibold">{lang.native}</div>
-                        <div className="text-xs opacity-70">{lang.name}</div>
-                      </div>
-                      {lang.code === currentLanguage.code && (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </button>
-                  ))}
+                  {languages.map((lang) => {
+                    console.log('🔍 Rendering language:', lang.name, lang.code);
+                    return (
+                      <button
+                        key={lang.code}
+                        onClick={() => changeLanguage(lang.code)}
+                        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          lang.code === currentLanguage.code
+                            ? 'bg-cyan-600 text-white'
+                            : 'hover:bg-gray-800 text-gray-300'
+                        }`}
+                      >
+                        <span className="text-2xl">{lang.flag}</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">{lang.native}</div>
+                          <div className="text-xs opacity-70">{lang.name}</div>
+                        </div>
+                        {lang.code === currentLanguage.code && (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </>

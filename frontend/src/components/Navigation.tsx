@@ -1,18 +1,20 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
 
 const Navigation: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const links = [
-    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/dashboard', label: t('nav.dashboard') },
     { path: '/3d-view', label: '3D Solar System' },
     { path: '/time-machine', label: 'Time Machine', highlight: true },
-    { path: '/prediction', label: 'Prediction',},
-    { path: '/impact', label: 'Impact',  },
-    { path: '/history', label: 'History', },
+    { path: '/prediction', label: t('nav.prediction') },
+    { path: '/impact', label: 'Impact' },
+    { path: '/history', label: t('nav.history') },
   ];
 
   return (
@@ -32,7 +34,7 @@ const Navigation: React.FC = () => {
               <span className="text-white font-display font-bold text-2xl tracking-tight">
                 Solar<span className="text-gradient">Shield</span>
               </span>
-              <div className="text-xs text-slate-400 font-medium">Space Weather Intelligence</div>
+              <div className="text-xs text-slate-400 font-medium">{t('dashboard.title')}</div>
             </div>
           </Link>
           

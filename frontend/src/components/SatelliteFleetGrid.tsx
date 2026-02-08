@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   SignalIcon,
   BoltIcon,
@@ -26,12 +27,13 @@ const SatelliteFleetGrid: React.FC<SatelliteFleetGridProps> = ({
   satellites, 
   radiationLevel = 0 
 }) => {
+  const { t } = useTranslation();
   const getRiskStatus = (health: number, degradation: number) => {
     const riskScore = (100 - health) + degradation;
     
     if (riskScore > 60) {
       return {
-        level: 'CRITICAL',
+        level: t('status.critical'),
         color: 'cyber-red',
         bg: 'bg-cyber-red/10',
         border: 'border-cyber-red',
@@ -40,7 +42,7 @@ const SatelliteFleetGrid: React.FC<SatelliteFleetGridProps> = ({
       };
     } else if (riskScore > 40) {
       return {
-        level: 'CAUTION',
+        level: t('status.warning'),
         color: 'cyber-amber',
         bg: 'bg-cyber-amber/10',
         border: 'border-cyber-amber',
@@ -49,7 +51,7 @@ const SatelliteFleetGrid: React.FC<SatelliteFleetGridProps> = ({
       };
     } else if (riskScore > 20) {
       return {
-        level: 'MONITOR',
+        level: t('status.medium'),
         color: 'cyber-amber-bright',
         bg: 'bg-cyber-amber-bright/10',
         border: 'border-cyber-amber-bright',
@@ -58,7 +60,7 @@ const SatelliteFleetGrid: React.FC<SatelliteFleetGridProps> = ({
       };
     } else {
       return {
-        level: 'NOMINAL',
+        level: t('status.operational'),
         color: 'cyber-green',
         bg: 'bg-cyber-green/10',
         border: 'border-cyber-green',
@@ -80,7 +82,7 @@ const SatelliteFleetGrid: React.FC<SatelliteFleetGridProps> = ({
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-display font-bold text-cyber-cyan uppercase tracking-wider">
-          Satellite Fleet Status
+          {t('nav.satellites')}
         </h2>
         <div className="flex items-center space-x-4">
           <div className="text-xs text-space-50 uppercase tracking-wider font-mono">

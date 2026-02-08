@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   ShieldCheckIcon, 
   ExclamationTriangleIcon,
@@ -18,6 +19,7 @@ const ThreatLevelBanner: React.FC<ThreatLevelBannerProps> = ({
   severity = 0,
   nextUpdateIn = 300 
 }) => {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState(nextUpdateIn);
 
   useEffect(() => {
@@ -40,47 +42,47 @@ const ThreatLevelBanner: React.FC<ThreatLevelBannerProps> = ({
     
     if (sev > 7 || prob > 0.7) {
       return {
-        level: 'CRITICAL',
+        level: t('status.critical'),
         code: 'RED',
         color: 'cyber-red',
         bgGradient: 'from-cyber-red/20 to-cyber-red-orange/20',
         borderColor: 'border-cyber-red',
         icon: BoltIcon,
-        message: 'SEVERE GEOMAGNETIC STORM IMMINENT',
-        action: 'IMMEDIATE ACTION REQUIRED',
+        message: t('alerts.severeStorm'),
+        action: t('alerts.severeStorm'),
       };
     } else if (sev > 5 || prob > 0.5) {
       return {
-        level: 'WARNING',
+        level: t('status.warning'),
         code: 'ORANGE',
         color: 'cyber-amber',
         bgGradient: 'from-cyber-amber/20 to-solar-600/20',
         borderColor: 'border-cyber-amber',
         icon: ExclamationTriangleIcon,
-        message: 'MODERATE STORM CONDITIONS EXPECTED',
-        action: 'MONITOR SATELLITE STATUS',
+        message: t('alerts.moderateActivity'),
+        action: t('alerts.moderateActivity'),
       };
     } else if (sev > 3 || prob > 0.3) {
       return {
-        level: 'WATCH',
+        level: t('status.active'),
         code: 'YELLOW',
         color: 'cyber-amber-bright',
         bgGradient: 'from-cyber-amber-bright/20 to-cyber-amber/20',
         borderColor: 'border-cyber-amber-bright',
         icon: ShieldExclamationIcon,
-        message: 'MINOR STORM ACTIVITY POSSIBLE',
-        action: 'MAINTAIN VIGILANCE',
+        message: t('alerts.moderateActivity'),
+        action: t('status.active'),
       };
     } else {
       return {
-        level: 'NOMINAL',
+        level: t('status.operational'),
         code: 'GREEN',
         color: 'cyber-green',
         bgGradient: 'from-cyber-green/20 to-aurora-600/20',
         borderColor: 'border-cyber-green',
         icon: ShieldCheckIcon,
-        message: 'ALL SYSTEMS NOMINAL',
-        action: 'ROUTINE MONITORING',
+        message: t('alerts.allNominal'),
+        action: t('status.operational'),
       };
     }
   };
@@ -118,7 +120,7 @@ const ThreatLevelBanner: React.FC<ThreatLevelBannerProps> = ({
             </motion.div>
             <div>
               <div className={`text-xs uppercase tracking-widest text-${threat.color} font-mono font-bold`}>
-                THREAT LEVEL
+                {t('dashboard.threatLevel')}
               </div>
               <div className={`text-2xl font-display font-black text-${threat.color} tracking-tight`}>
                 {threat.code}
@@ -129,7 +131,7 @@ const ThreatLevelBanner: React.FC<ThreatLevelBannerProps> = ({
           {/* Message */}
           <div className="lg:col-span-4 lg:border-l lg:border-r border-space-50/20 lg:px-4">
             <div className="text-sm text-space-50 uppercase tracking-wider font-mono mb-1">
-              Status
+              {t('status.safe')}
             </div>
             <div className="text-lg font-display font-bold text-white">
               {threat.message}
@@ -143,7 +145,7 @@ const ThreatLevelBanner: React.FC<ThreatLevelBannerProps> = ({
           <div className="lg:col-span-4 grid grid-cols-2 gap-4">
             <div className="bg-space-300/30 rounded-lg p-3 border border-cyber-cyan/20">
               <div className="text-[10px] text-space-50 uppercase tracking-widest font-mono mb-1">
-                Storm Probability
+                {t('alerts.stormProbability')}
               </div>
               <div className="flex items-baseline space-x-1">
                 <span className="data-value text-2xl">

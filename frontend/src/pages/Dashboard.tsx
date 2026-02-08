@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { API } from '../config/api';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
 import LiveDataTicker from '../components/LiveDataTicker';
@@ -27,6 +28,7 @@ interface SatelliteData {
 }
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [currentData, setCurrentData] = useState<any>(null);
   const [predictions, setPredictions] = useState<any>(null);
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
@@ -124,11 +126,11 @@ const Dashboard: React.FC = () => {
   };
 
   const handleSatelliteUpdate = (updatedSatellites: any[]) => {
-    console.log('📡 Dashboard: Received satellite update');
-    console.log('📡 Count received:', updatedSatellites.length);
-    console.log('📡 Satellite names received:', updatedSatellites.map((s: any) => s.name));
+    console.log('Dashboard: Received satellite update');
+    console.log(' Count received:', updatedSatellites.length);
+    console.log(' Satellite names received:', updatedSatellites.map((s: any) => s.name));
     setSatellites(updatedSatellites);
-    console.log('📡 Dashboard state updated with', updatedSatellites.length, 'satellites');
+    console.log('Dashboard state updated with', updatedSatellites.length, 'satellites');
   };
 
   return (

@@ -33,4 +33,6 @@ loguru
 python-dotenv
 
 # AI/Chatbot
-anthropic  # Claude AI integration for SOLAR-GPT chatbot
+google-generativeai>=0.3.0  # Google Gemini AI integration for SOLAR-GPT chatbot
+grpcio  # Required for Google API communication
+protobuf  # Required for Google API protocol buffers

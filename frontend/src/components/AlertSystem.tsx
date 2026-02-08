@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   XMarkIcon,
   ExclamationTriangleIcon,
@@ -23,6 +24,7 @@ interface AlertSystemProps {
 }
 
 const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) => {
+  const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -36,8 +38,8 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
         newAlerts.push({
           id: `speed-${Date.now()}`,
           type: 'critical',
-          title: 'CRITICAL: Extreme Solar Wind',
-          message: `Solar wind velocity at ${currentData.speed.toFixed(0)} km/s exceeds critical threshold`,
+          title: `${t('status.critical')}: ${t('alerts.highSpeed')}`,
+          message: `${t('alerts.highSpeed')} ${currentData.speed.toFixed(0)} ${t('units.kmPerSec')}`,
           timestamp: new Date(),
           dismissed: false,
         });
@@ -45,8 +47,8 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
         newAlerts.push({
           id: `speed-warning-${Date.now()}`,
           type: 'warning',
-          title: 'WARNING: Elevated Solar Wind',
-          message: `Solar wind velocity at ${currentData.speed.toFixed(0)} km/s - Monitor satellite status`,
+          title: `${t('status.warning')}: ${t('alerts.highSpeed')}`,
+          message: `${t('alerts.highSpeed')} ${currentData.speed.toFixed(0)} ${t('units.kmPerSec')}`,
           timestamp: new Date(),
           dismissed: false,
         });
@@ -57,8 +59,8 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
         newAlerts.push({
           id: `bz-${Date.now()}`,
           type: 'critical',
-          title: 'CRITICAL: Severe Southward IMF',
-          message: `Bz component at ${currentData.bz.toFixed(1)} nT - High geomagnetic storm risk`,
+          title: `${t('status.critical')}: ${t('alerts.imfWarning')}`,
+          message: `${t('alerts.imfWarning')} ${currentData.bz.toFixed(1)} ${t('units.nanoTesla')}`,
           timestamp: new Date(),
           dismissed: false,
         });
@@ -69,8 +71,8 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
         newAlerts.push({
           id: `kp-${Date.now()}`,
           type: 'critical',
-          title: 'STORM IN PROGRESS',
-          message: `Kp index at ${currentData.kp_index.toFixed(0)} - Severe geomagnetic storm conditions`,
+          title: t('status.storm'),
+          message: `${t('dashboard.kpIndex')} ${currentData.kp_index.toFixed(0)} - ${t('alerts.severeStorm')}`,
           timestamp: new Date(),
           dismissed: false,
         });
@@ -81,8 +83,8 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
       newAlerts.push({
         id: `prediction-${Date.now()}`,
         type: 'warning',
-        title: 'High Storm Probability',
-        message: `AI model predicts ${(predictions.probability * 100).toFixed(0)}% probability of geomagnetic storm`,
+        title: t('alerts.stormProbability'),
+        message: `${t('alerts.stormProbability')} ${(predictions.probability * 100).toFixed(0)}${t('units.percent')}`,
         timestamp: new Date(),
         dismissed: false,
       });
@@ -97,7 +99,7 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
         return combined.slice(0, 10);
       });
     }
-  }, [currentData, predictions]);
+  }, [currentData, predictions, t]);
 
   const dismissAlert = (id: string) => {
     setAlerts(prev => prev.map(a => a.id === id ? { ...a, dismissed: true } : a));
@@ -143,11 +145,13 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
   const activeAlerts = alerts.filter(a => !a.dismissed);
 
   return (
-    <div className="fixed right-4 top-24 z-50 w-96 max-w-full">
+    <div className="fixed right-4 top-24 z-40 w-96 max-w-full">
       {/* Header */}
-      <div 
-        className="mission-panel p-3 cursor-pointer hover:border-cyber-cyan mb-2"
+      <motion.div 
+        className="mission-panel p-3 cursor-pointer hover:border-cyber-cyan mb-2 shadow-xl"
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -170,7 +174,7 @@ const AlertSystem: React.FC<AlertSystemProps> = ({ predictions, currentData }) =
             </svg>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Alerts Container */}
       <AnimatePresence>

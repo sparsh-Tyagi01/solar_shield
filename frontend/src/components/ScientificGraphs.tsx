@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import axios from 'axios';
 import { API } from '../config/api';
@@ -9,6 +10,7 @@ interface ScientificGraphsProps {
 }
 
 const ScientificGraphs: React.FC<ScientificGraphsProps> = ({ currentData }) => {
+  const { t } = useTranslation();
   const [historicalData, setHistoricalData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ const ScientificGraphs: React.FC<ScientificGraphsProps> = ({ currentData }) => {
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-display font-bold text-cyber-cyan uppercase tracking-wider">
-            Solar Wind Velocity
+            {t('launch.solarWind')} {t('dashboard.monitoring')}
           </h3>
           <div className="text-right">
             <div className="data-value text-xl font-bold">

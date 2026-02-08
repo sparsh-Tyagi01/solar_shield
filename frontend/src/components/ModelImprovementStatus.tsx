@@ -227,7 +227,7 @@ const ModelImprovementStatus: React.FC = () => {
           </div>
           <div className="mt-4 pt-3 border-t border-gray-200">
             <p className="text-xs text-slate-600 text-center">
-              💡 Models automatically improve as actual outcomes are recorded and compared with predictions
+               Models automatically improve as actual outcomes are recorded and compared with predictions
             </p>
           </div>
         </div>

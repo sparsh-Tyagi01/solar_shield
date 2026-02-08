@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface VoiceAlertSystemProps {
   kpIndex: number;
@@ -33,6 +34,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
   issRiskLevel,
   className = ''
 }) => {
+  const { t } = useTranslation();
   const [isEnabled, setIsEnabled] = useState(() => {
     const saved = localStorage.getItem('voiceAlerts_enabled');
     return saved !== null ? JSON.parse(saved) : true;
@@ -242,7 +244,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
 
   return (
     <div className={className}>
-      {/* Floating Control Button */}
+      {/* Floating Control Button - Bottom Left */}
       <motion.button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white group relative ${
@@ -319,9 +321,9 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
       <AnimatePresence>
         {isPanelOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -400 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -400 }}
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="fixed top-40 left-6 z-40 w-[450px] max-h-[calc(100vh-200px)] glass-effect rounded-2xl shadow-2xl shadow-cyan-500/10 border border-cyan-400/20 overflow-hidden flex flex-col"
           >
@@ -474,14 +476,14 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                   disabled={isSpeaking}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 rounded-lg text-white text-sm font-display font-bold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-cyan-500/50"
                 >
-                  🎤 Test Alert
+                  🎤 {t('voice.test')}
                 </button>
                 {isSpeaking && (
                   <button
                     onClick={stopSpeaking}
                     className="px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 rounded-lg text-white text-sm font-display font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-red-500/50"
                   >
-                    🛑 Stop
+                    🛑 {t('voice.stop')}
                   </button>
                 )}
               </div>
@@ -542,7 +544,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
                       <div key={type} className="flex items-center justify-between px-2 py-1 rounded bg-slate-800/30 border border-cyan-400/10">
                         <span className="text-slate-400 uppercase">{type.replace(/_/g, ' ')}</span>
                         <span className={`font-mono ${isActive ? 'text-orange-500' : 'text-green-500'}`}>
-                          {isActive ? `🔒 ${cooldown}` : '✅ Ready'}
+                          {isActive ? `🔒 ${cooldown}` : `✅ ${t('voice.ready')}`}
                         </span>
                       </div>
                     );

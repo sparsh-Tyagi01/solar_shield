@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { jsPDF } from 'jspdf';
 
 interface ProtocolItem {
@@ -35,6 +36,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
   satelliteHealth,
   className = ''
 }) => {
+  const { t } = useTranslation();
   const [currentProtocol, setCurrentProtocol] = useState<Protocol | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<Record<string, number>>({});
@@ -480,7 +482,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
       {/* Floating Status Button */}
       <motion.button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className={`fixed bottom-24 left-6 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 bg-gradient-to-r ${getSeverityColor(currentProtocol.severity)} text-white font-bold transition-all duration-300 hover:scale-105`}
+        className={`fixed bottom-6 left-24 z-50 px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 bg-gradient-to-r ${getSeverityColor(currentProtocol.severity)} text-white font-bold transition-all duration-300 hover:scale-105 border-2 border-white/30`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Emergency Protocols"
@@ -500,7 +502,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 400 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-40 left-6 z-40 w-[550px] max-h-[calc(100vh-220px)] bg-gray-900 rounded-2xl shadow-2xl border-2 overflow-hidden flex flex-col"
+            className="fixed bottom-20 left-24 z-40 w-[550px] max-h-[calc(100vh-200px)] bg-gray-900 rounded-2xl shadow-2xl border-2 overflow-hidden flex flex-col"
             style={{ borderColor: getSeverityBorderColor(currentProtocol.severity).replace('border-', '') }}
           >
             {/* Header */}
@@ -510,7 +512,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
                   <span className="text-4xl">⚡</span>
                   <div>
                     <h3 className="font-bold text-white text-xl">{currentProtocol.title}</h3>
-                    <p className="text-xs text-white/90">Generated: {currentProtocol.generatedAt.toLocaleTimeString()}</p>
+                    <p className="text-xs text-white/90">{t('protocols.generated')}: {currentProtocol.generatedAt.toLocaleTimeString()}</p>
                   </div>
                 </div>
                 <button
@@ -532,7 +534,7 @@ const EmergencyProtocols: React.FC<EmergencyProtocolsProps> = ({
                   transition={{ duration: 0.5 }}
                 />
               </div>
-              <p className="text-xs text-white/80 mt-2">{getProgress().toFixed(0)}% of protocol actions completed</p>
+              <p className="text-xs text-white/80 mt-2">{getProgress().toFixed(0)}% {t('protocols.completed')}</p>
             </div>
 
             {/* Description */}

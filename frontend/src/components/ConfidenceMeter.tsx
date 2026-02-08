@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface ConfidenceMeterProps {
   confidence: number; // 0-100
@@ -31,6 +32,7 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
   predictions,
   className = ''
 }) => {
+  const { t } = useTranslation();
   const [factors, setFactors] = useState<Factor[]>([]);
   const [similarEvents, setSimilarEvents] = useState<SimilarEvent[]>([]);
   const [confidenceHistory, setConfidenceHistory] = useState<number[]>([]);
@@ -142,10 +144,10 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
   const strokeDashoffset = circumference - (confidence / 100) * circumference;
 
   const metrics = [
-    { name: 'Accuracy', value: 87, icon: '✅' },
-    { name: 'Precision', value: 84, icon: '✅' },
-    { name: 'Recall', value: 91, icon: '✅' },
-    { name: 'False Alarms', value: 8, icon: '🟢', inverse: true }
+    { name: t('confidence.accuracy'), value: 87, icon: '✅' },
+    { name: t('confidence.precision'), value: 84, icon: '✅' },
+    { name: t('confidence.recall'), value: 91, icon: '✅' },
+    { name: t('confidence.falseAlarms'), value: 8, icon: '🟢', inverse: true }
   ];
 
   return (
@@ -153,10 +155,10 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-display font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center space-x-2">
-          <span>🎯</span>
-          <span>AI CONFIDENCE DASHBOARD</span>
+          
+          <span>{t('confidence.title')}</span>
         </h2>
-        <p className="text-sm text-gray-400">Prediction reliability and model explainability</p>
+        <p className="text-sm text-gray-400">{t('confidence.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -203,7 +205,7 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
                 >
                   {confidence}%
                 </motion.div>
-                <div className="text-sm text-gray-400 mt-2">Prediction Confidence</div>
+                <div className="text-sm text-gray-400 mt-2">{t('confidence.prediction')}</div>
               </div>
             </div>
 
@@ -227,7 +229,7 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
 
           {/* Model Performance Metrics */}
           <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
-            <h3 className="text-lg font-bold text-white mb-3">📊 Model Performance</h3>
+            <h3 className="text-lg font-bold text-white mb-3">📊 {t('confidence.performance')}</h3>
             <div className="grid grid-cols-2 gap-3">
               {metrics.map((metric) => (
                 <div key={metric.name} className="bg-gray-800/50 rounded-lg p-3">
@@ -247,8 +249,8 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
           {/* AI Reasoning */}
           <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
-              <span>🤖</span>
-              <span>AI REASONING</span>
+             
+              <span>{t('confidence.reasoning')}</span>
             </h3>
             <div className="space-y-3">
               {factors.map((factor, idx) => (
@@ -283,7 +285,7 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
           {/* Similar Events */}
           <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
-              <span>📊</span>
+              
               <span>HISTORICAL MATCH</span>
             </h3>
             {similarEvents.length > 0 && (
@@ -293,7 +295,7 @@ const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
                     Current conditions <span className="font-bold text-cyan-400">{similarEvents[0].similarity}%</span> similar to:
                   </div>
                   <div className="text-lg font-bold text-white mb-2">
-                    🌩️ {similarEvents[0].name}
+                     {similarEvents[0].name}
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>

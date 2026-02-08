@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface LaunchWindowAdvisorProps {
   currentData: any;
@@ -21,6 +22,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
   predictions,
   className = ''
 }) => {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() + 86400000)); // Tomorrow
   const [selectedLocation, setSelectedLocation] = useState('Cape Canaveral, FL');
   const [missionType, setMissionType] = useState('LEO');
@@ -120,10 +122,10 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-display font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center space-x-2">
-          <span>🚀</span>
-          <span>LAUNCH WINDOW ADVISOR</span>
+          
+          <span>{t('launch.title')}</span>
         </h2>
-        <p className="text-sm text-gray-400">Optimal timing for space missions based on space weather</p>
+        <p className="text-sm text-gray-400">{t('launch.subtitle')}</p>
       </div>
 
       {/* Input Form */}
@@ -131,7 +133,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Launch Date */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">Launch Date</label>
+            <label className="block text-sm font-semibold text-gray-300 mb-2">{t('launch.date')}</label>
             <input
               type="date"
               value={selectedDate.toISOString().split('T')[0]}
@@ -142,7 +144,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">Launch Location</label>
+            <label className="block text-sm font-semibold text-gray-300 mb-2">{t('launch.location')}</label>
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
@@ -156,7 +158,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
 
           {/* Mission Type */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">Mission Type</label>
+            <label className="block text-sm font-semibold text-gray-300 mb-2">{t('launch.missionType')}</label>
             <select
               value={missionType}
               onChange={(e) => setMissionType(e.target.value)}
@@ -174,7 +176,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
               onClick={analyzeWindows}
               className="w-full px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all duration-300 hover:scale-105"
             >
-              Analyze Risk
+              {t('launch.analyze')}
             </button>
           </div>
         </div>
@@ -207,30 +209,30 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
 
               <div className="mb-4">
                 <div className={`text-3xl font-bold ${currentColors.text} mb-2`}>
-                  RISK SCORE: {currentWindow.risk}%
+                  {t('launch.riskScore')}: {currentWindow.risk}%
                 </div>
                 <div className={`text-xl font-bold uppercase ${
                   currentWindow.status === 'low' ? 'text-green-400' :
                   currentWindow.status === 'medium' ? 'text-yellow-400' : 'text-red-400'
                 }`}>
-                  {currentWindow.status === 'low' ? '✅ RECOMMENDED' :
-                   currentWindow.status === 'medium' ? '⚠️ CAUTION ADVISED' : '❌ NOT RECOMMENDED'}
+                  {currentWindow.status === 'low' ? `✅ ${t('launch.recommended')}` :
+                   currentWindow.status === 'medium' ? `⚠️ ${t('launch.caution')}` : `❌ ${t('launch.notRecommended')}`}
                 </div>
               </div>
 
               <div className="bg-gray-900/50 rounded-lg p-4 space-y-2">
-                <div className="text-sm font-semibold text-white mb-2">Conditions:</div>
+                <div className="text-sm font-semibold text-white mb-2">{t('launch.conditions')}:</div>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
-                    <span className="text-gray-400">Kp Index:</span>
+                    <span className="text-gray-400">{t('launch.kpIndex')}:</span>
                     <span className="ml-2 font-bold text-white">{currentWindow.kp}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Solar Wind:</span>
+                    <span className="text-gray-400">{t('launch.solarWind')}:</span>
                     <span className="ml-2 font-bold text-white">{currentWindow.speed} km/s</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Storm Prob:</span>
+                    <span className="text-gray-400">{t('launch.stormProb')}:</span>
                     <span className="ml-2 font-bold text-white">{currentWindow.stormProb}%</span>
                   </div>
                 </div>
@@ -238,7 +240,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
 
               {currentWindow.status !== 'low' && (
                 <div className="mt-4 text-sm text-gray-300">
-                  <div className="font-semibold mb-2">Reasons:</div>
+                  <div className="font-semibold mb-2">{t('launch.reasons')}:</div>
                   <ul className="list-disc list-inside space-y-1">
                     {currentWindow.kp > 5 && <li>High Kp index ({currentWindow.kp}) indicates geomagnetic activity</li>}
                     {currentWindow.speed > 500 && <li>Elevated solar wind speed ({currentWindow.speed} km/s)</li>}
@@ -250,7 +252,7 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
 
             {/* 7-Day Windows */}
             <div className="bg-gray-900/50 rounded-lg p-5 border border-gray-700">
-              <h3 className="text-lg font-bold text-white mb-4">📅 Next 7 Days</h3>
+              <h3 className="text-lg font-bold text-white mb-4">📅 {t('launch.nextDays')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                 {windows.map((window, idx) => {
                   const colors = getRiskColor(window.status);
@@ -291,8 +293,8 @@ const LaunchWindowAdvisor: React.FC<LaunchWindowAdvisorProps> = ({
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="text-4xl">✅</span>
                   <div>
-                    <h3 className="text-2xl font-bold text-green-400">OPTIMAL LAUNCH WINDOW</h3>
-                    <p className="text-sm text-gray-300">Recommended alternative window</p>
+                    <h3 className="text-2xl font-bold text-green-400">{t('launch.optimal')}</h3>
+                    <p className="text-sm text-gray-300">{t('launch.alternative')}</p>
                   </div>
                 </div>
 

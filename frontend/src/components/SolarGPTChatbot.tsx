@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API } from '../config/api';
 
@@ -14,6 +15,7 @@ interface ChatbotProps {
 }
 
 const SolarGPTChatbot: React.FC<ChatbotProps> = ({ className = '' }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -26,10 +28,10 @@ const SolarGPTChatbot: React.FC<ChatbotProps> = ({ className = '' }) => {
 
   // Suggested questions
   const suggestedQuestions = [
-    "What's the current Kp index?",
-    "Is ISS safe right now?",
-    "When is the next storm?",
-    "Should I worry about my satellite?"
+    t('chatbot.suggestedQuestions.kp'),
+    t('chatbot.suggestedQuestions.iss'),
+    t('chatbot.suggestedQuestions.storm'),
+    t('chatbot.suggestedQuestions.satellite')
   ];
 
   // Auto-scroll to bottom

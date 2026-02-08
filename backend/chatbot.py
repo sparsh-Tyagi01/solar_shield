@@ -1,8 +1,8 @@
 """
-AI Chatbot SOLAR-GPT powered by Anthropic Claude
+AI Chatbot SOLAR-GPT powered by Google Gemini
 Provides intelligent space weather assistance with real-time data context
 """
-import anthropic
+import google.generativeai as genai
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -15,14 +15,20 @@ class SolarGPT:
     """AI Assistant for Space Weather Intelligence"""
     
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         if not self.api_key:
-            logger.warning("ANTHROPIC_API_KEY not found. Chatbot will use fallback mode.")
+            logger.warning("GEMINI_API_KEY not found. Chatbot will use fallback mode.")
             self.client = None
         else:
-            self.client = anthropic.Anthropic(api_key=self.api_key)
+            try:
+                genai.configure(api_key=self.api_key)
+                self.client = genai.GenerativeModel('gemini-2.5-flash')
+                logger.info("✓ Google Gemini initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize Gemini: {e}")
+                self.client = None
         
-        self.model = "claude-3-5-sonnet-20241022"  # Latest Claude model
+        self.model = "gemini-pro"
         self.max_tokens = 1024
         
     def build_system_prompt(self, realtime_data: Dict[str, Any]) -> str:
@@ -95,7 +101,7 @@ Your goal: Help users understand space weather, assess risks, and make informed 
         realtime_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Process chat message with Claude AI
+        Process chat message with Google Gemini AI
         
         Args:
             user_message: User's input message
@@ -113,56 +119,60 @@ Your goal: Help users understand space weather, assess risks, and make informed 
             # Build system prompt with real-time data
             system_prompt = self.build_system_prompt(realtime_data)
             
-            # Prepare conversation messages
-            messages = conversation_history.copy()
-            messages.append({"role": "user", "content": user_message})
+            # Format conversation for Gemini
+            # Gemini uses a simpler format - just combine history into context
+            context = system_prompt + "\n\n"
             
-            # Keep only last 10 messages to avoid token limits
-            if len(messages) > 20:  # 10 exchanges
-                messages = messages[-20:]
+            # Add conversation history
+            for msg in conversation_history[-10:]:  # Last 5 exchanges
+                role = "User" if msg["role"] == "user" else "Assistant"
+                context += f"{role}: {msg['content']}\n\n"
             
-            logger.info(f"Sending message to Claude: {user_message[:100]}...")
+            # Add current user message
+            full_prompt = context + f"User: {user_message}\n\nAssistant:"
             
-            # Call Claude API
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                system=system_prompt,
-                messages=messages,
-                temperature=0.7
+            logger.info(f"Sending message to Gemini: {user_message[:100]}...")
+            
+            # Call Gemini API
+            response = self.client.generate_content(
+                full_prompt,
+                generation_config={
+                    'temperature': 0.7,
+                    'max_output_tokens': self.max_tokens,
+                }
             )
             
-            assistant_message = response.content[0].text
+            assistant_message = response.text
             
-            logger.info(f"Received response from Claude: {assistant_message[:100]}...")
+            logger.info(f"Received response from Gemini: {assistant_message[:100]}...")
             
             return {
                 "response": assistant_message,
                 "timestamp": datetime.utcnow().isoformat(),
-                "confidence": 0.95,  # Claude is generally very confident
-                "tokens_used": response.usage.input_tokens + response.usage.output_tokens,
+                "confidence": 0.90,  # Gemini is generally very good
                 "model": self.model
             }
             
-        except anthropic.APIError as e:
-            logger.error(f"Anthropic API error: {e}")
-            return {
-                "response": f"⚠️ I'm having trouble connecting to my AI brain right now. Error: {str(e)}\n\nPlease check your ANTHROPIC_API_KEY environment variable.",
-                "timestamp": datetime.utcnow().isoformat(),
-                "confidence": 0.0,
-                "error": str(e)
-            }
         except Exception as e:
-            logger.error(f"Chatbot error: {e}", exc_info=True)
-            return {
-                "response": f"❌ Oops! Something went wrong: {str(e)}\n\nPlease try again or rephrase your question.",
-                "timestamp": datetime.utcnow().isoformat(),
-                "confidence": 0.0,
-                "error": str(e)
-            }
+            logger.error(f"Gemini API error: {e}")
+            # Try fallback on error
+            if "API key" in str(e) or "GEMINI_API_KEY" in str(e):
+                return {
+                    "response": f"⚠️ I'm having trouble connecting to my AI brain. Please check your GEMINI_API_KEY environment variable.\n\nError: {str(e)}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "confidence": 0.0,
+                    "error": str(e)
+                }
+            else:
+                return {
+                    "response": f"❌ Oops! Something went wrong: {str(e)}\n\nPlease try again or rephrase your question.",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "confidence": 0.0,
+                    "error": str(e)
+                }
     
     def _fallback_response(self, user_message: str, realtime_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Provide intelligent fallback responses when Claude API is unavailable"""
+        """Provide intelligent fallback responses when Gemini API is unavailable"""
         
         message_lower = user_message.lower()
         current = realtime_data.get('current_conditions', {})
@@ -231,7 +241,7 @@ Your goal: Help users understand space weather, assess risks, and make informed 
 • Explain technical terms
 • Provide recommendations
 
-*Note: AI mode currently limited. For full capabilities, add ANTHROPIC_API_KEY to environment.*"""
+*Note: AI mode currently limited. For full capabilities, add GEMINI_API_KEY to environment.*"""
         
         return {
             "response": response,

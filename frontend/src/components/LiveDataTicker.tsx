@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface LiveDataTickerProps {
   data: any;
 }
 
 const LiveDataTicker: React.FC<LiveDataTickerProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -21,29 +23,29 @@ const LiveDataTicker: React.FC<LiveDataTickerProps> = ({ data }) => {
     {
       label: 'SOLAR WIND',
       value: data?.speed || 0,
-      unit: 'km/s',
-      status: data?.speed > 500 ? 'HIGH' : data?.speed > 400 ? 'NOMINAL' : 'LOW',
+      unit: t('units.kmPerSec'),
+      status: data?.speed > 500 ? t('status.high') : data?.speed > 400 ? t('status.operational') : t('status.low'),
       critical: data?.speed > 700,
     },
     {
       label: 'IMF Bz',
       value: data?.bz || 0,
-      unit: 'nT',
-      status: data?.bz < -10 ? 'SOUTHWARD' : data?.bz < 0 ? 'WEAK SOUTH' : 'NORTHWARD',
+      unit: t('units.nanoTesla'),
+      status: data?.bz < -10 ? t('status.critical') : data?.bz < 0 ? t('status.warning') : t('status.safe'),
       critical: data?.bz < -15,
     },
     {
-      label: 'Kp INDEX',
+      label: t('dashboard.kpIndex'),
       value: data?.kp_index || 0,
       unit: '',
-      status: data?.kp_index > 5 ? 'STORM' : data?.kp_index > 3 ? 'ACTIVE' : 'QUIET',
+      status: data?.kp_index > 5 ? t('status.storm') : data?.kp_index > 3 ? t('status.active') : t('status.quiet'),
       critical: data?.kp_index > 7,
     },
     {
       label: 'PROTON DENSITY',
       value: data?.density || 0,
-      unit: 'p/cm³',
-      status: data?.density > 15 ? 'ELEVATED' : 'NOMINAL',
+      unit: t('units.protonsCm3'),
+      status: data?.density > 15 ? t('status.high') : t('status.operational'),
       critical: data?.density > 20,
     },
   ];
@@ -55,7 +57,7 @@ const LiveDataTicker: React.FC<LiveDataTickerProps> = ({ data }) => {
           {/* UTC Clock */}
           <div className="lg:col-span-1 text-center lg:text-left">
             <div className="text-xs text-space-50 uppercase tracking-wider mb-1 font-mono">
-              Mission Time
+              {t('dashboard.missionTime')}
             </div>
             <div className="data-value text-lg font-mono tracking-tight">
               {formatUTC(time)}
