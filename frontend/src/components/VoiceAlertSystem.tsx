@@ -247,7 +247,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
       {/* Floating Control Button - Bottom Left */}
       <motion.button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white group relative ${
+        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white group ${
           isSpeaking 
             ? 'bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse shadow-cyan-500/50' 
             : isEnabled

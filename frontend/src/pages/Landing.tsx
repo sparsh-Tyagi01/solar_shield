@@ -374,7 +374,8 @@ const Landing: React.FC = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, delay: 0.1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
             className="text-xl text-slate-300 mb-12 font-body"
           >
             Get real-time insights and predictions for solar storms and their impact on satellite infrastructure.
@@ -382,7 +383,8 @@ const Landing: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, delay: 0.2 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
             className="flex flex-col sm:flex-row justify-center gap-4"
           >
             <Link 
