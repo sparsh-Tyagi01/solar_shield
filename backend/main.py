@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 # import shap  # Optional - only needed for SHAP explanations
 
-from backend.ml import (
+from .ml import (
     StormOccurrencePredictor,
     StormSeverityPredictor,
     ImpactRiskClassifier
