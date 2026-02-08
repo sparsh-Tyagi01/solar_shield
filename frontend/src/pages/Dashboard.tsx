@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { API } from '../config/api';
 import SolarSystemVisualization from '../components/SolarSystemVisualization';
 import LiveDataTicker from '../components/LiveDataTicker';
@@ -28,7 +27,6 @@ interface SatelliteData {
 }
 
 const Dashboard: React.FC = () => {
-  const { t } = useTranslation();
   const [currentData, setCurrentData] = useState<any>(null);
   const [predictions, setPredictions] = useState<any>(null);
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
