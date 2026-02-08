@@ -203,7 +203,7 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* How It Works Section */}
       <section className="relative px-6 py-24 bg-gradient-to-b from-slate-800 to-slate-900">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
@@ -214,32 +214,29 @@ const Landing: React.FC = () => {
             className="text-center mb-16"
           >
             <h2 className="text-5xl md:text-6xl font-display font-bold mb-6">
-              Trusted by Industry Leaders
+              How It <span className="text-gradient">Works</span>
             </h2>
             <p className="text-xl text-slate-400 font-body max-w-2xl mx-auto">
-              Organizations worldwide rely on SolarShield to protect their critical satellite infrastructure
+              Three simple steps to monitor and predict solar storms
             </p>
           </motion.div>
 
-          {/* Testimonials Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <TestimonialCard 
-              quote="SolarShield's predictive capabilities have saved us millions in potential satellite damage. The 72-hour forecasts are remarkably accurate."
-              author="Dr. Sarah Chen"
-              role="Director of Satellite Operations"
-              company="SpaceComm"
+          {/* Steps Grid */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <StepCard 
+              number="01"
+              title="Real-Time Data Collection"
+              description="Continuously fetch and process solar activity data from NOAA, DSCOVR, and other trusted space weather sources."
             />
-            <TestimonialCard 
-              quote="The real-time monitoring dashboard gives us complete visibility into solar threats. Essential for our operations."
-              author="James Wilson"
-              role="Chief Technology Officer"
-              company="Global Telecom"
+            <StepCard 
+              number="02"
+              title="AI Analysis & Prediction"
+              description="Advanced machine learning models analyze patterns to predict solar storms up to 72 hours in advance."
             />
-            <TestimonialCard 
-              quote="Implementing SolarShield was the best decision for our infrastructure protection strategy. Highly recommended."
-              author="Maria Rodriguez"
-              role="VP Engineering"
-              company="Orbital Systems"
+            <StepCard 
+              number="03"
+              title="Actionable Insights"
+              description="Get real-time alerts, impact assessments, and satellite vulnerability analysis in one dashboard."
             />
           </div>
         </div>
@@ -465,36 +462,29 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) =
   );
 };
 
-// Testimonial Card Component
-interface TestimonialCardProps {
-  quote: string;
-  author: string;
-  role: string;
-  company: string;
+// Step Card Component
+interface StepCardProps {
+  number: string;
+  title: string;
+  description: string;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, role, company }) => {
+const StepCard: React.FC<StepCardProps> = ({ number, title, description }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ scale: 1.03, y: -4 }}
-      className="glass-effect rounded-2xl p-8 border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20"
+      className="glass-effect rounded-2xl p-8 border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20 relative group"
     >
-      <div className="flex items-start gap-1 mb-4">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="text-cyan-400">★</div>
-        ))}
+      {/* Step Number */}
+      <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg group-hover:scale-110 transition-transform">
+        {number}
       </div>
-      
-      <p className="text-slate-200 font-body italic mb-6 leading-relaxed">"{quote}"</p>
-      
-      <div className="border-t border-slate-700/50 pt-4">
-        <p className="text-white font-semibold">{author}</p>
-        <p className="text-sm text-slate-400">{role}</p>
-        <p className="text-sm text-cyan-400">{company}</p>
-      </div>
+
+      <h3 className="text-xl font-display font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">{title}</h3>
+      <p className="text-slate-400 font-body leading-relaxed group-hover:text-slate-300 transition-colors">{description}</p>
     </motion.div>
   );
 };
