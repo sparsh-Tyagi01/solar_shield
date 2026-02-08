@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Live Data Ticker - Always at Top */}
       <LiveDataTicker data={currentData} />
 
@@ -145,32 +145,46 @@ const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-8"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-display font-black text-cyber-cyan uppercase tracking-wider mb-1">
-                SOLARSHIELD
+              <div className="mb-2">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 backdrop-blur">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-cyan-300 font-mono uppercase tracking-wider">Live Monitoring</span>
+                </span>
+              </div>
+              <h1 className="text-5xl md:text-6xl font-display font-black text-white mb-2">
+                <span className="text-gradient">SOLARSHIELD</span> Mission Control
               </h1>
-              <p className="text-sm text-space-50 font-mono uppercase tracking-widest">
-                Mission Control • Real-Time Monitoring
+              <p className="text-sm text-slate-400 font-mono uppercase tracking-widest">
+                Real-Time Space Weather Intelligence • Satellite Protection System
               </p>
             </div>
             <div className="flex items-center space-x-4">
               {backendConnected ? (
-                <div className="flex items-center space-x-2 mission-panel px-4 py-2">
+                <motion.div 
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center space-x-3 glass-effect rounded-lg px-4 py-3 border-l-2 border-l-cyber-green"
+                >
                   <div className="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></div>
-                  <span className="text-xs text-cyber-green font-mono uppercase tracking-wider">
+                  <span className="text-sm text-cyber-green font-mono uppercase tracking-wider">
                     System Operational
                   </span>
-                </div>
+                </motion.div>
               ) : (
-                <div className="flex items-center space-x-2 mission-panel px-4 py-2 border-cyber-red">
+                <motion.div 
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center space-x-3 glass-effect rounded-lg px-4 py-3 border-l-2 border-l-cyber-red"
+                >
                   <div className="w-2 h-2 bg-cyber-red rounded-full animate-blink"></div>
-                  <span className="text-xs text-cyber-red font-mono uppercase tracking-wider">
+                  <span className="text-sm text-cyber-red font-mono uppercase tracking-wider">
                     Connection Lost
                   </span>
-                </div>
+                </motion.div>
               )}
             </div>
           </div>
@@ -178,49 +192,66 @@ const Dashboard: React.FC = () => {
 
         {/* Threat Level Banner */}
         {backendConnected && (
-          <ThreatLevelBanner 
-            predictions={predictions}
-            severity={predictions?.severity || currentData?.kp_index || 0}
-            nextUpdateIn={300}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-8"
+          >
+            <ThreatLevelBanner 
+              predictions={predictions}
+              severity={predictions?.severity || currentData?.kp_index || 0}
+              nextUpdateIn={300}
+            />
+          </motion.div>
         )}
 
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
           {/* Left Panel - 3D Earth & Controls - Wider */}
           <div className="lg:col-span-8 space-y-6">
             {/* 3D Visualization */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mission-panel p-4"
+              transition={{ delay: 0.2 }}
+              className="glass-effect rounded-2xl p-6 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-display font-bold text-cyber-cyan uppercase tracking-wider">
-                  Real-Time 3D Solar System
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></div>
-                  <span className="text-xs text-space-50 font-mono">LIVE</span>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-display font-bold text-white mb-1">
+                    Real-Time 3D Solar System
+                  </h2>
+                  <p className="text-sm text-slate-400">Interactive orbit visualization and radiation mapping</p>
                 </div>
+                <motion.div 
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30"
+                >
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                  <span className="text-xs text-cyan-300 font-mono">LIVE</span>
+                </motion.div>
               </div>
               
               {!backendConnected ? (
-                <div className="w-full h-[500px] flex items-center justify-center bg-space-300/30 rounded-lg radar-grid">
+                <div className="w-full h-[500px] flex items-center justify-center bg-slate-900/50 rounded-xl radar-grid">
                   <div className="text-center">
                     <div className="text-6xl mb-4">🛰️</div>
-                    <div className="data-value text-xl mb-2">Awaiting Backend Connection</div>
-                    <div className="text-sm text-space-50 font-mono mb-4">Initializing satellite tracking systems...</div>
-                    <button
+                    <div className="text-xl font-display text-white mb-2">Awaiting Backend Connection</div>
+                    <div className="text-sm text-slate-400 font-mono mb-6">Initializing satellite tracking systems...</div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={fetchCurrentData}
-                      className="px-6 py-3 bg-cyber-cyan text-space-400 rounded-lg hover:bg-cyber-cyan-bright transition-colors font-display font-bold uppercase tracking-wide text-sm"
+                      className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all font-display font-bold uppercase tracking-wide text-sm"
                     >
                       Establish Connection
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               ) : (
-                <div className="w-full h-[500px] radar-grid rounded-lg overflow-hidden">
+                <div className="w-full h-[500px] radar-grid rounded-xl overflow-hidden border border-cyan-400/10">
                   <SolarSystemVisualization
                     radiationLevel={radiationLevel}
                     bzValue={currentData?.bz || 0}
@@ -233,11 +264,11 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
               
-              <div className="mt-3 pt-3 border-t border-cyber-cyan/20">
-                <p className="text-[10px] text-space-50 font-mono uppercase tracking-wider text-center">
+              <div className="mt-4 pt-4 border-t border-cyan-400/10">
+                <p className="text-xs text-slate-400 font-mono uppercase tracking-wider text-center">
                   {backendConnected 
-                    ? `Interactive Orbit View • ${satellites.length} Assets Tracked • Real-Time Solar Wind Simulation`
-                    : 'System Standby • Awaiting Real-Time Data Stream'}
+                    ? `✓ Interactive Orbit View • ${satellites.length} Assets Tracked • Real-Time Solar Wind Simulation`
+                    : '○ System Standby • Awaiting Real-Time Data Stream'}
                 </p>
               </div>
             </motion.div>
@@ -246,7 +277,7 @@ const Dashboard: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
             >
               <ScientificGraphs currentData={currentData} />
             </motion.div>
@@ -274,8 +305,8 @@ const Dashboard: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-6"
+            transition={{ delay: 0.4 }}
+            className="mb-8"
           >
             <SatelliteFleetGrid 
               satellites={satellites} 
@@ -289,15 +320,15 @@ const Dashboard: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mb-6"
+            transition={{ delay: 0.5 }}
+            className="mb-8"
           >
-            <div className="mission-panel p-6">
-              <div className="mb-4">
-                <h2 className="text-2xl font-display font-bold text-cyber-cyan uppercase tracking-wider mb-2">
+            <div className="glass-effect rounded-2xl p-6 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10">
+              <div className="mb-6">
+                <h2 className="text-2xl font-display font-bold text-white mb-2">
                   Global Impact Zones
                 </h2>
-                <p className="text-sm text-space-50 font-mono">
+                <p className="text-sm text-slate-400">
                   Real-time satellite coverage • Aurora zones • Affected geographic regions
                 </p>
               </div>
@@ -316,8 +347,8 @@ const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-6"
+          transition={{ delay: 0.6 }}
+          className="mb-8"
         >
           <ConfidenceMeter
             confidence={predictions.confidence || 87}
@@ -331,8 +362,8 @@ const Dashboard: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="mb-6"
+        transition={{ delay: 0.7 }}
+        className="mb-8"
       >
         <LaunchWindowAdvisor
           currentData={currentData}
