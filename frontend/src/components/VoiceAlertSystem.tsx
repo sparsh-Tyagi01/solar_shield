@@ -245,7 +245,7 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
       {/* Floating Control Button */}
       <motion.button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white ${
+        className={`fixed top-24 left-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 font-display font-bold text-white group relative ${
           isSpeaking 
             ? 'bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse shadow-cyan-500/50' 
             : isEnabled
@@ -254,17 +254,52 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
         }`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        title="Voice Alert System"
+        title="Space Weather Alert System"
       >
         {isSpeaking ? (
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 1 }}
+            className="relative w-6 h-6"
           >
-            🔊
+            {/* Animated sound waves */}
+            <svg className="w-6 h-6 absolute inset-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V9z" />
+              <path d="M9 16v-1a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
+            </svg>
+            {/* Pulsing rings */}
+            <motion.div className="absolute inset-0 border-2 border-white rounded-full" animate={{ scale: [1, 1.5], opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} />
           </motion.div>
         ) : (
-          <span className="text-2xl">{isEnabled ? '🔔' : '🔕'}</span>
+          <div className="relative w-6 h-6">
+            {isEnabled ? (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+                {/* Satellite icon */}
+                <g>
+                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                  {/* Solar panels */}
+                  <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                  <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                  {/* Antenna */}
+                  <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+                  {/* Signal rings */}
+                  <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+                  <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                </g>
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5" opacity="0.5">
+                <g>
+                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                  <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.5" />
+                  <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.5" />
+                  <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+                  <circle cx="12" cy="2" r="1.5" fill="currentColor" opacity="0.5" />
+                </g>
+              </svg>
+            )}
+          </div>
         )}
         
         {/* Speaking indicator */}
@@ -293,7 +328,17 @@ const VoiceAlertSystem: React.FC<VoiceAlertSystemProps> = ({
             {/* Header */}
             <div className="bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border-b border-cyan-400/20 p-6 flex items-center justify-between backdrop-blur-sm">
               <div className="flex items-center space-x-3">
-                <span className="text-3xl animate-pulse">🔔</span>
+                <svg className="w-6 h-6 text-cyan-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.5">
+                  <g>
+                    <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                    <rect x="3" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                    <rect x="18" y="10" width="3" height="4" fill="currentColor" opacity="0.8" />
+                    <line x1="12" y1="12" x2="12" y2="2" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.3" />
+                  </g>
+                </svg>
                 <div>
                   <h3 className="font-display font-bold text-white text-lg">Space Weather Alerts</h3>
                   <p className="text-xs text-cyan-300 font-mono uppercase tracking-widest">Real-time monitoring system</p>
