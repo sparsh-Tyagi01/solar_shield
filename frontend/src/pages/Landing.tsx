@@ -28,8 +28,8 @@ const Landing: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Section with Video */}
-      <section className="relative h-screen overflow-hidden">
-        {/* Background Video */}
+      <section className="relative min-h-screen overflow-hidden pt-20 pb-20">
+        {/* Background Video with Enhanced Overlay */}
         <div className="absolute inset-0 z-0">
           <video
             ref={videoRef}
@@ -37,16 +37,32 @@ const Landing: React.FC = () => {
             loop
             muted
             playsInline
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-35"
           >
             <source src="/10925862-hd_1920_1080_30fps.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/70"></div>
+          
+          {/* Animated Background Elements */}
+          <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+          <div className="absolute bottom-0 right-10 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         {/* Content */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <div className="max-w-6xl mx-auto text-center px-6">
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="max-w-4xl mx-auto text-center px-6">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 backdrop-blur"
+            >
+              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-cyan-300">Next Generation Space Weather AI</span>
+            </motion.div>
+            
+            {/* Icon */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -54,54 +70,47 @@ const Landing: React.FC = () => {
               className="flex justify-center mb-8"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-                <Shield className="relative w-24 h-24 text-cyan-400 drop-shadow-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full blur-3xl opacity-40 animate-pulse"></div>
+                <Shield className="relative w-20 h-20 text-cyan-400 drop-shadow-2xl" />
               </div>
             </motion.div>
             
+            {/* Main Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-7xl md:text-8xl font-display font-bold mb-6"
+              className="text-5xl md:text-6xl lg:text-7xl font-display font-bold mb-6 leading-tight"
             >
-              <span className="text-gradient">Solar</span>
-              <span className="text-white">Shield</span>
+              <span className="text-gradient">Protect Your</span>
+              <br />
+              <span className="text-white">Satellite Infrastructure</span>
             </motion.h1>
             
+            {/* Subheadline */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl md:text-2xl text-slate-200 mb-12 max-w-3xl mx-auto font-body"
+              transition={{ delay: 0.3 }}
+              className="text-lg md:text-xl text-slate-300 mb-12 max-w-2xl mx-auto font-body leading-relaxed"
             >
-              Advanced Space Weather Intelligence & Satellite Protection with AI-Powered Predictions
+              AI-powered space weather intelligence with 72-hour solar storm predictions and real-time satellite monitoring
             </motion.p>
             
+            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex flex-wrap justify-center gap-4"
+              transition={{ delay: 0.4 }}
+              className="flex flex-col sm:flex-row justify-center gap-4 mb-16"
             >
               <Link to="/dashboard">
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-display font-semibold text-lg shadow-2xl hover:shadow-cyan-500/50 transition-all"
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full font-display font-semibold text-lg shadow-2xl hover:shadow-cyan-500/50 transition-all whitespace-nowrap"
                 >
                   Launch Dashboard
-                </motion.button>
-              </Link>
-              
-              <Link to="/time-machine">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 glass-effect text-white rounded-xl font-display font-semibold text-lg shadow-2xl border border-cyan-400/50 hover:border-cyan-400 transition-all flex items-center space-x-2 animate-pulse-slow"
-                >
-                  <Clock className="w-5 h-5" />
-                  <span>Time Machine</span>
                 </motion.button>
               </Link>
               
@@ -109,36 +118,57 @@ const Landing: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-display font-semibold text-lg shadow-2xl border border-white/20 hover:bg-white/20 transition-all"
+                  className="px-8 py-4 glass-effect text-white rounded-full font-display font-semibold text-lg border border-cyan-400/50 hover:border-cyan-400 transition-all"
                 >
                   Learn More
                 </motion.button>
               </a>
+            </motion.div>
+
+            {/* Stats Row */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="grid grid-cols-3 gap-8 pt-12 border-t border-slate-700/50"
+            >
+              <div>
+                <div className="text-3xl font-bold text-cyan-400 mb-2">72h</div>
+                <div className="text-sm text-slate-400 font-body">Prediction Window</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-cyan-400 mb-2">99.9%</div>
+                <div className="text-sm text-slate-400 font-body">Uptime Guarantee</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-cyan-400 mb-2">Real-time</div>
+                <div className="text-sm text-slate-400 font-body">Data Updates</div>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="px-6 py-20 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section id="features" className="relative px-6 py-24 bg-gradient-to-b from-slate-900 to-slate-800">
         <div className="max-w-6xl mx-auto">
-          <motion.h2
+          {/* Section Header */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-5xl font-display font-bold text-gradient text-center mb-4"
+            className="text-center mb-20"
           >
-            Key Features
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center text-slate-300 mb-16 text-lg font-body"
-          >
-            Powered by cutting-edge AI and real-time space weather data
-          </motion.p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <h2 className="text-5xl md:text-6xl font-display font-bold mb-6">
+              <span className="text-gradient">Enterprise-Grade</span> Features
+            </h2>
+            <p className="text-xl text-slate-400 font-body max-w-2xl mx-auto">
+              Everything you need to protect your satellite infrastructure from solar storms
+            </p>
+          </motion.div>
+
+          {/* Feature Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeatureCard 
               icon={<Clock className="w-8 h-8" />}
               title="Solar Storm Time Machine"
@@ -173,13 +203,60 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* Terminology Section */}
-      <section className="px-6 py-20 bg-white">
+      {/* Testimonials Section */}
+      <section className="relative px-6 py-24 bg-gradient-to-b from-slate-800 to-slate-900">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-slate-900 text-center mb-4">
-            Key Terms & Concepts
-          </h2>
-          <p className="text-center text-gray-600 mb-16 text-lg">Understanding space weather terminology</p>
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-display font-bold mb-6">
+              Trusted by Industry Leaders
+            </h2>
+            <p className="text-xl text-slate-400 font-body max-w-2xl mx-auto">
+              Organizations worldwide rely on SolarShield to protect their critical satellite infrastructure
+            </p>
+          </motion.div>
+
+          {/* Testimonials Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TestimonialCard 
+              quote="SolarShield's predictive capabilities have saved us millions in potential satellite damage. The 72-hour forecasts are remarkably accurate."
+              author="Dr. Sarah Chen"
+              role="Director of Satellite Operations"
+              company="SpaceComm"
+            />
+            <TestimonialCard 
+              quote="The real-time monitoring dashboard gives us complete visibility into solar threats. Essential for our operations."
+              author="James Wilson"
+              role="Chief Technology Officer"
+              company="Global Telecom"
+            />
+            <TestimonialCard 
+              quote="Implementing SolarShield was the best decision for our infrastructure protection strategy. Highly recommended."
+              author="Maria Rodriguez"
+              role="VP Engineering"
+              company="Orbital Systems"
+            />
+          </div>
+        </div>
+      </section>
+      <section className="px-6 py-24 bg-gradient-to-b from-slate-900 to-slate-800">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-display font-bold text-gradient mb-6">
+              Key Concepts Explained
+            </h2>
+            <p className="text-xl text-slate-400 font-body">Understanding space weather terminology</p>
+          </motion.div>
           <div className="grid md:grid-cols-2 gap-6">
             <TermCard 
               term="Solar Storm"
@@ -234,13 +311,20 @@ const Landing: React.FC = () => {
       </section>
 
       {/* Data Sources Section */}
-      <section className="px-6 py-20 bg-gray-50">
+      <section className="px-6 py-24 bg-gradient-to-b from-slate-800 to-slate-900">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-slate-900 text-center mb-4">
-            Data Sources & Metrics
-          </h2>
-          <p className="text-center text-gray-600 mb-16 text-lg">Real-time data from trusted sources</p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-display font-bold text-gradient mb-6">
+              Data Sources & Metrics
+            </h2>
+            <p className="text-xl text-slate-400 font-body">Real-time data from trusted sources</p>
+          </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <MetricCard 
               icon={<Database className="w-6 h-6" />}
               title="NOAA SWPC"
@@ -276,20 +360,58 @@ const Landing: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20 bg-[#081a44]">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-            Ready to Monitor Solar Activity?
-          </h2>
-          <p className="text-xl mb-8 text-blue-50">
-            Get real-time insights and predictions for solar storms and their impact on satellite infrastructure.
-          </p>
-          <Link 
-            to="/dashboard" 
-            className="inline-block px-8 py-4 bg-white text-blue-900 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg"
+      <section className="relative px-6 py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 opacity-20 -z-10">
+          <div className="absolute top-20 right-10 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-5xl md:text-6xl font-display font-bold mb-6"
           >
-            Launch Dashboard
-          </Link>
+            Ready to Protect Your <span className="text-gradient">Satellites</span>?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, delay: 0.1 }}
+            className="text-xl text-slate-300 mb-12 font-body"
+          >
+            Get real-time insights and predictions for solar storms and their impact on satellite infrastructure.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, delay: 0.2 }}
+            className="flex flex-col sm:flex-row justify-center gap-4"
+          >
+            <Link 
+              to="/dashboard" 
+              className="inline-block"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full font-display font-semibold text-lg shadow-2xl hover:shadow-cyan-500/50 transition-all"
+              >
+                Launch Dashboard Now
+              </motion.button>
+            </Link>
+            <a href="#features" className="inline-block">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-10 py-4 glass-effect text-white rounded-full font-display font-semibold text-lg border border-cyan-400/50 hover:border-cyan-400 transition-all"
+              >
+                Explore Features
+              </motion.button>
+            </a>
+          </motion.div>
         </div>
       </section>
 
@@ -312,36 +434,67 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  highlight?: boolean;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, highlight = false }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ scale: 1.05, y: -5 }}
-      className={`
-        glass-effect rounded-xl p-6 hover-lift cursor-pointer
-        ${highlight 
-          ? 'bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-400 animate-pulse-slow' 
-          : 'bg-gradient-to-br from-slate-800/50 to-slate-700/50 border border-slate-600'
-        }
-      `}
+      whileHover={{ scale: 1.05, y: -8 }}
+      className="group glass-effect rounded-2xl p-8 border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20 relative overflow-hidden"
     >
-      <div className={`mb-4 ${highlight ? 'text-cyan-400' : 'text-blue-400'}`}>
-        {icon}
-      </div>
-      <h3 className="text-xl font-display font-bold text-white mb-3">{title}</h3>
-      <p className="text-slate-300 font-body">{description}</p>
-      {highlight && (
-        <div className="mt-4">
-          <span className="inline-block px-3 py-1 bg-cyan-400 text-slate-900 rounded-full text-xs font-bold">
-            NEW FEATURE
-          </span>
+      {/* Hover Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+      
+      {/* Icon Container */}
+      <div className="mb-6 w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center group-hover:from-cyan-500/40 group-hover:to-blue-600/40 transition-all duration-300">
+        <div className="text-cyan-400 group-hover:text-cyan-300 transition-colors">
+          {icon}
         </div>
-      )}
+      </div>
+
+      {/* Content */}
+      <h3 className="text-xl font-display font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">{title}</h3>
+      <p className="text-slate-400 font-body leading-relaxed group-hover:text-slate-300 transition-colors">{description}</p>
+
+      {/* Decorative Element */}
+      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
+    </motion.div>
+  );
+};
+
+// Testimonial Card Component
+interface TestimonialCardProps {
+  quote: string;
+  author: string;
+  role: string;
+  company: string;
+}
+
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, role, company }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ scale: 1.03, y: -4 }}
+      className="glass-effect rounded-2xl p-8 border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20"
+    >
+      <div className="flex items-start gap-1 mb-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="text-cyan-400">★</div>
+        ))}
+      </div>
+      
+      <p className="text-slate-200 font-body italic mb-6 leading-relaxed">"{quote}"</p>
+      
+      <div className="border-t border-slate-700/50 pt-4">
+        <p className="text-white font-semibold">{author}</p>
+        <p className="text-sm text-slate-400">{role}</p>
+        <p className="text-sm text-cyan-400">{company}</p>
+      </div>
     </motion.div>
   );
 };
@@ -354,10 +507,15 @@ interface TermCardProps {
 
 const TermCard: React.FC<TermCardProps> = ({ term, definition }) => {
   return (
-    <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-blue-300 transition-colors">
-      <h3 className="text-lg font-bold text-slate-900 mb-2">{term}</h3>
-      <p className="text-gray-600">{definition}</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="glass-effect rounded-xl p-6 border border-slate-700 hover:border-cyan-400/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10"
+    >
+      <h3 className="text-lg font-bold text-cyan-400 mb-3 group-hover:text-cyan-300 transition-colors">{term}</h3>
+      <p className="text-slate-400 font-body group-hover:text-slate-300 transition-colors">{definition}</p>
+    </motion.div>
   );
 };
 
@@ -370,11 +528,16 @@ interface MetricCardProps {
 
 const MetricCard: React.FC<MetricCardProps> = ({ icon, title, description }) => {
   return (
-    <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-      <div className="text-blue-600 mb-3">{icon}</div>
-      <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600">{description}</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="glass-effect rounded-xl p-6 border border-slate-700 hover:border-cyan-400/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10"
+    >
+      <div className="text-cyan-400 mb-3 group-hover:text-cyan-300 transition-colors">{icon}</div>
+      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">{title}</h3>
+      <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">{description}</p>
+    </motion.div>
   );
 };
 
