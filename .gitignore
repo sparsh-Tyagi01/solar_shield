@@ -59,3 +59,5 @@ Environment
 *.ipynb
 
 .env
+*.pkl
+data/improvement/
