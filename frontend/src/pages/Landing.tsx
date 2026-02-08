@@ -82,9 +82,7 @@ const Landing: React.FC = () => {
               transition={{ delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-display font-bold mb-6 leading-tight"
             >
-              <span className="text-gradient">Protect Your</span>
-              <br />
-              <span className="text-white">Satellite Infrastructure</span>
+              <span className="text-gradient">SolarShield</span>
             </motion.h1>
             
             {/* Subheadline */}
@@ -94,7 +92,7 @@ const Landing: React.FC = () => {
               transition={{ delay: 0.3 }}
               className="text-lg md:text-xl text-slate-300 mb-12 max-w-2xl mx-auto font-body leading-relaxed"
             >
-              AI-powered space weather intelligence with 72-hour solar storm predictions and real-time satellite monitoring
+              AI-powered space weather intelligence with 12-24 hour solar storm predictions and real-time satellite monitoring
             </motion.p>
             
             {/* CTA Buttons */}
@@ -133,7 +131,7 @@ const Landing: React.FC = () => {
               className="grid grid-cols-3 gap-8 pt-12 border-t border-slate-700/50"
             >
               <div>
-                <div className="text-3xl font-bold text-cyan-400 mb-2">72h</div>
+                <div className="text-3xl font-bold text-cyan-400 mb-2">12-24h</div>
                 <div className="text-sm text-slate-400 font-body">Prediction Window</div>
               </div>
               <div>
@@ -182,7 +180,7 @@ const Landing: React.FC = () => {
             <FeatureCard 
               icon={<TrendingUp className="w-8 h-8" />}
               title="Storm Prediction"
-              description="Advanced machine learning models predict solar storm occurrence and severity up to 72 hours in advance."
+              description="Advanced machine learning models predict solar storm occurrence and severity up to 12-24 hours in advance."
             />
             <FeatureCard 
               icon={<AlertTriangle className="w-8 h-8" />}
@@ -231,7 +229,7 @@ const Landing: React.FC = () => {
             <StepCard 
               number="02"
               title="AI Analysis & Prediction"
-              description="Advanced machine learning models analyze patterns to predict solar storms up to 72 hours in advance."
+              description="Advanced machine learning models analyze patterns to predict solar storms up to 12-24 hours in advance."
             />
             <StepCard 
               number="03"
